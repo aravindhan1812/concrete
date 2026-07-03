@@ -1,0 +1,114 @@
+/* BuildFlow ERP — MD3-inspired tokens. Palette: blueprint indigo + safety amber. */
+:root {
+  --primary: #2f4a8a;        /* blueprint indigo */
+  --on-primary: #ffffff;
+  --primary-container: #dde5f7;
+  --accent: #e8a020;         /* safety amber */
+  --surface: #f7f8fb;
+  --surface-1: #ffffff;
+  --surface-2: #eef1f7;
+  --outline: #d5dae5;
+  --on-surface: #1a1f2b;
+  --muted: #5b6474;
+  --danger: #b3261e;
+  --success: #2e7d4f;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(20, 30, 60, 0.10), 0 4px 14px rgba(20, 30, 60, 0.06);
+}
+[data-theme='dark'] {
+  --primary: #a9c0f5;
+  --on-primary: #16233f;
+  --primary-container: #2c3a5e;
+  --accent: #f2b13f;
+  --surface: #12151c;
+  --surface-1: #1a1e28;
+  --surface-2: #232937;
+  --outline: #394153;
+  --on-surface: #e6e9f0;
+  --muted: #99a2b5;
+  --danger: #f2b8b5;
+  --success: #7fd0a0;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-size: 14px;
+}
+h1, h2, h3 { font-family: 'Archivo', 'Inter', sans-serif; letter-spacing: -0.01em; }
+button { font: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; }
+
+/* Layout */
+.shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.sidebar {
+  background: var(--surface-1); border-right: 1px solid var(--outline);
+  padding: 16px 12px; display: flex; flex-direction: column; gap: 4px;
+}
+.brand { font-family: 'Archivo'; font-weight: 800; font-size: 18px; padding: 8px 12px 16px; }
+.brand em { color: var(--accent); font-style: normal; }
+.nav-item {
+  display: block; padding: 9px 12px; border-radius: 999px; color: var(--muted);
+  text-decoration: none; font-weight: 500;
+}
+.nav-item.active, .nav-item:hover { background: var(--primary-container); color: var(--primary); }
+.main { padding: 20px 28px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.topbar h1 { font-size: 22px; margin: 0; }
+
+/* Controls */
+.btn {
+  border: none; border-radius: 999px; padding: 9px 18px; font-weight: 600;
+  background: var(--primary); color: var(--on-primary);
+}
+.btn.secondary { background: var(--surface-2); color: var(--on-surface); }
+.btn.ghost { background: transparent; color: var(--primary); }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.field input, .field select, .field textarea {
+  border: 1px solid var(--outline); border-radius: 8px; padding: 9px 12px;
+  background: var(--surface-1); color: var(--on-surface);
+}
+.field input:focus, .field select:focus { outline: 2px solid var(--primary); border-color: transparent; }
+
+/* Pipeline board — the signature element */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: 250px; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+.column { background: var(--surface-2); border-radius: var(--radius); padding: 10px; }
+.column h3 {
+  margin: 2px 4px 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); display: flex; justify-content: space-between;
+}
+.column h3 .count { background: var(--surface-1); border-radius: 999px; padding: 1px 8px; }
+.card {
+  background: var(--surface-1); border-radius: 10px; box-shadow: var(--shadow);
+  padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid var(--accent);
+}
+.card .title { font-weight: 600; margin-bottom: 2px; }
+.card .meta { color: var(--muted); font-size: 12px; display: flex; justify-content: space-between; }
+.card .value { color: var(--primary); font-weight: 600; }
+.card .actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--outline); background: transparent; color: var(--on-surface);
+  border-radius: 999px; padding: 3px 10px; font-size: 12px;
+}
+.chip:hover { background: var(--primary-container); border-color: transparent; }
+
+/* Login */
+.login-wrap { min-height: 100vh; display: grid; place-items: center; }
+.login-card {
+  width: 360px; background: var(--surface-1); border-radius: 16px; box-shadow: var(--shadow); padding: 28px;
+}
+.login-card h1 { margin: 0 0 4px; font-size: 24px; }
+.login-card p.sub { color: var(--muted); margin: 0 0 20px; }
+.error { color: var(--danger); font-size: 13px; margin: 8px 0; }
+
+/* Dialog */
+.dialog-backdrop { position: fixed; inset: 0; background: rgba(10, 14, 24, 0.45); display: grid; place-items: center; }
+.dialog { width: 420px; max-height: 88vh; overflow: auto; background: var(--surface-1); border-radius: 16px; padding: 22px; }
+.dialog h2 { margin: 0 0 14px; font-size: 18px; }
+.dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+
+@media (max-width: 720px) { .shell { grid-template-columns: 1fr; } .sidebar { display: none; } }
