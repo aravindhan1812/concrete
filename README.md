@@ -1,4 +1,4 @@
-# BuildFlow ERP
+# Concrete ERP
 
 AI-powered Construction & Interior Project Management SaaS — Phase 0 foundation.
 

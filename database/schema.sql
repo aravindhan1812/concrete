@@ -1,5 +1,5 @@
 -- ============================================================
--- BuildFlow ERP — PostgreSQL Schema (v1.0)
+-- Concrete ERP — PostgreSQL Schema (v1.0)
 -- Multi-tenant (row-level via company_id), UUID PKs, audit-ready
 -- Conventions: snake_case, soft delete via deleted_at, money NUMERIC(14,2)
 -- ============================================================

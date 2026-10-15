@@ -18,7 +18,7 @@ import { RbacModule } from './modules/rbac/rbac.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        url: config.get<string>('DATABASE_URL', 'postgres://buildflow:buildflow@localhost:5432/buildflow'),
+        url: config.get<string>('DATABASE_URL', 'postgres://concrete:concrete@localhost:5432/concrete'),
         autoLoadEntities: true,
         synchronize: false, // schema is owned by database/schema.sql
       }),

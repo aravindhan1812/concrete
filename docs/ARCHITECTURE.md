@@ -1,8 +1,8 @@
-# BuildFlow ERP — Architecture & API Design
+# Concrete ERP — Architecture & API Design
 
 ## 1. System overview
 
-BuildFlow is a multi-tenant SaaS ERP for construction and interior contractors. One deployment serves many companies; every business row carries a `company_id` and every query is scoped to it server-side (row-level tenancy). This keeps operations simple at early scale while leaving a clean migration path to schema-per-tenant or Postgres RLS if a large enterprise customer demands it.
+Concrete is a multi-tenant SaaS ERP for construction and interior contractors. One deployment serves many companies; every business row carries a `company_id` and every query is scoped to it server-side (row-level tenancy). This keeps operations simple at early scale while leaving a clean migration path to schema-per-tenant or Postgres RLS if a large enterprise customer demands it.
 
 ```
 ┌──────────────┐   ┌───────────────┐

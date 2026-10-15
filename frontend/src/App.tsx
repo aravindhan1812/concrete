@@ -30,7 +30,7 @@ export default function App() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          Build<em>Flow</em>
+          Concrete
         </div>
         {NAV.map((item) => (
           <a

@@ -1,6 +1,6 @@
-# BuildFlow ERP — Product Scope
+# Concrete ERP — Product Scope
 
-This is the source of truth for **what BuildFlow must do**. `ARCHITECTURE.md` covers *how* it is built; this document covers *what* is built, what exists today, what is missing, and the order of work. Each module section ends with a **Status / gaps** block so a contributor (human or coding agent) can pick up a module and know exactly what to add.
+This is the source of truth for **what Concrete must do**. `ARCHITECTURE.md` covers *how* it is built; this document covers *what* is built, what exists today, what is missing, and the order of work. Each module section ends with a **Status / gaps** block so a contributor (human or coding agent) can pick up a module and know exactly what to add.
 
 Legend: ✅ built · 🟡 designed in `database/schema.sql`, not built · ❌ not designed yet
 
@@ -8,7 +8,7 @@ Legend: ✅ built · 🟡 designed in `database/schema.sql`, not built · ❌ no
 
 ## 1. Product vision
 
-BuildFlow is a single, multi-tenant SaaS ERP that runs **the whole business of a construction or interior contractor** — from the first enquiry to the final handover and the books of account — with AI that creates and updates records, and dashboards tailored to each role.
+Concrete is a single, multi-tenant SaaS ERP that runs **the whole business of a construction or interior contractor** — from the first enquiry to the final handover and the books of account — with AI that creates and updates records, and dashboards tailored to each role.
 
 Hard requirements:
 
@@ -25,7 +25,7 @@ Hard requirements:
 
 Role templates are cloned into each company at signup and can be edited freely (`admin.roles.manage`).
 
-| Role | Primary job in BuildFlow | Main device |
+| Role | Primary job in Concrete | Main device |
 |---|---|---|
 | Company Owner | Everything; profitability, cash, risk | Desktop + phone |
 | Director | Read everything, approvals | Desktop + phone |
@@ -198,7 +198,7 @@ Employees (with or without a login), daily-wage labour under labour contractors,
 
 ### 5.14 Accounting — full double-entry
 
-BuildFlow is the **system of record for the books**. Every financial document posts balanced journal entries automatically; no module writes money figures that the ledger does not know about.
+Concrete is the **system of record for the books**. Every financial document posts balanced journal entries automatically; no module writes money figures that the ledger does not know about.
 
 **Core ledger**
 
@@ -245,7 +245,7 @@ BuildFlow is the **system of record for the books**. Every financial document po
 
 **Reports**: day book, ledger, trial balance, profit and loss, balance sheet, cash flow, receivable and payable ageing, project-wise P&L, cost-code analysis, GST and TDS reports, budget vs actual. All filterable by branch, project and period, all exportable to Excel/PDF.
 
-**Integration**: export to Tally (XML) for companies whose auditors insist; API for other tools. BuildFlow remains the master.
+**Integration**: export to Tally (XML) for companies whose auditors insist; API for other tools. Concrete remains the master.
 
 **Status / gaps:** 🟡 cost codes, budgets, expenses, client invoices, payments, bank accounts and transactions, TDS register, `v_project_costing` view. ❌ chart of accounts, journal entries and lines, voucher types, financial years and period locks, posting rules, party sub-ledgers and bill-wise settlement, GST returns, retention/advance accounting, WIP recognition, financial reports. `v_project_costing` will be rebuilt on top of the ledger.
 
@@ -271,7 +271,7 @@ Self-registration and document upload, PO acceptance and delivery-date updates, 
 
 ## 6. AI
 
-AI in BuildFlow **does work**, not just chat. It runs through the same API and permission checks as a human user, under a clearly marked AI actor.
+AI in Concrete **does work**, not just chat. It runs through the same API and permission checks as a human user, under a clearly marked AI actor.
 
 **Principles**
 
@@ -356,7 +356,7 @@ Each phase ends with working, tested screens — not just APIs.
 ## 10. Open questions
 
 1. **Target customer size** — small interior firms, mid-size builders, or both? Affects default approval and procurement depth.
-2. **Payroll depth** — full statutory payroll inside BuildFlow, or attendance + wage calculation exported to a payroll provider?
+2. **Payroll depth** — full statutory payroll inside Concrete, or attendance + wage calculation exported to a payroll provider?
 3. **Payment gateway** for the client portal (Razorpay, Cashfree, …).
 4. **Messaging channel** — WhatsApp Business API for notifications and portal links?
 5. **Languages** beyond English, and which first.

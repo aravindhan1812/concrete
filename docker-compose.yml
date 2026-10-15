@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: buildflow
-      POSTGRES_PASSWORD: buildflow
-      POSTGRES_DB: buildflow
+      POSTGRES_USER: concrete
+      POSTGRES_PASSWORD: concrete
+      POSTGRES_DB: concrete
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U buildflow"]
+      test: ["CMD-SHELL", "pg_isready -U concrete"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -20,7 +20,7 @@ services:
   api:
     build: ./backend
     environment:
-      DATABASE_URL: postgres://buildflow:buildflow@db:5432/buildflow
+      DATABASE_URL: postgres://concrete:concrete@db:5432/concrete
       JWT_ACCESS_SECRET: dev-access-secret-change-in-prod
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
       CORS_ORIGIN: http://localhost:5173

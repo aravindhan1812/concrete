@@ -9,6 +9,6 @@ async function bootstrap() {
   app.enableCors({ origin: (process.env.CORS_ORIGIN ?? 'http://localhost:5173').split(','), credentials: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(Number(process.env.PORT ?? 3000));
-  console.log(`BuildFlow API running on :${process.env.PORT ?? 3000}`);
+  console.log(`Concrete API running on :${process.env.PORT ?? 3000}`);
 }
 void bootstrap();

@@ -1,4 +1,4 @@
--- BuildFlow ERP — Seed: permission catalog + system role templates
+-- Concrete ERP — Seed: permission catalog + system role templates
 INSERT INTO permissions (code, module, description) VALUES
 -- CRM
 ('crm.leads.read','crm','View leads'),('crm.leads.create','crm','Create leads'),

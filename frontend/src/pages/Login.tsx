@@ -39,7 +39,7 @@ export default function Login({ onLogin }: Props) {
     <div className="login-wrap">
       <form className="login-card" onSubmit={submit}>
         <h1>
-          Build<em style={{ color: 'var(--accent)', fontStyle: 'normal' }}>Flow</em>
+          Concrete
         </h1>
         <p className="sub">
           {mode === 'login' ? 'Sign in to your workspace' : 'Create your company workspace'}
