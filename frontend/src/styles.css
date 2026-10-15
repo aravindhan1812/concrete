@@ -338,3 +338,37 @@ a { color: var(--primary); }
 @media (min-width: 640px) and (max-width: 1023px) {
   .main { padding: 20px 20px 32px; }
 }
+
+/* ---------- Notifications ---------- */
+.notif-wrap { position: relative; }
+.bell { position: relative; display: inline-grid; place-items: center; }
+.badge {
+  position: absolute; top: -5px; right: -8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: var(--danger); color: #fff; font-size: 10.5px; font-weight: 700; line-height: 18px; text-align: center;
+  box-shadow: 0 0 0 2px var(--surface-1);
+}
+[data-theme='dark'] .badge { color: #2a0d0b; }
+.notif-popover {
+  /* fixed: the sidebar clips overflow, so the popover is positioned against the viewport beside it */
+  position: fixed; z-index: 40; width: 360px; max-height: min(520px, 70vh); display: flex; flex-direction: column;
+  background: var(--surface-1); border: 1px solid var(--outline); border-radius: 14px; box-shadow: var(--shadow-lg);
+  left: calc(var(--sidebar-w) + 8px); bottom: 16px;
+}
+.rail .notif-popover { left: calc(var(--rail-w) + 8px); }
+.notif-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px 8px; }
+.notif-title { font-family: 'Archivo'; font-weight: 700; font-size: 15px; }
+.dialog .notif-head { display: none; }
+.notif-list { overflow-y: auto; padding: 0 6px 8px; }
+.notif-empty { color: var(--muted); padding: 20px 12px; text-align: center; }
+.notif-item {
+  display: flex; gap: 10px; width: 100%; text-align: left; border: none; background: transparent; border-radius: 10px;
+  padding: 10px 10px; min-height: var(--tap); align-items: flex-start;
+}
+.notif-item:hover { background: var(--surface-2); }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex: none; background: transparent; }
+.notif-item.unread .notif-dot { background: var(--primary); }
+.notif-item.unread .notif-item-title { font-weight: 600; }
+.notif-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.notif-item-title { color: var(--on-surface); }
+.notif-body { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.notif-time { color: var(--muted); font-size: 11.5px; }

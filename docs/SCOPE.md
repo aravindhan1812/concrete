@@ -57,13 +57,13 @@ These are shared by every module and are built once.
 | Configurable RBAC | `module.resource.action` permission codes on roles | ✅ |
 | Audit log | Every mutation recorded with actor (human or AI), before/after | ✅ (actor type for AI ❌) |
 | Branches, warehouses | Company → branches → warehouses (site stores are warehouses with a project) | 🟡 |
-| Files | Polymorphic attachments, GPS + timestamp for site photos, S3-compatible storage | 🟡 |
-| Approval engine | Ordered, configurable approval steps by document type and amount threshold; reused by POs, quotations, expenses, leave, permits, change orders, journals | 🟡 (amount rules ❌) |
+| Files | Polymorphic attachments, GPS + timestamp for site photos, S3-compatible storage | ✅ API (presigned upload/download, type + size checks, access follows the record); upload UI with the first detail screens |
+| Approval engine | Ordered, configurable approval steps by document type and amount threshold; reused by POs, quotations, expenses, leave, permits, change orders, journals | ✅ engine, rules, inbox API, notifications, outcome handlers (modules start submitting from P1) |
 | **Checklist engine** | Reusable templates (sections, items, pass criteria, photo required, mandatory) → filled instances. Shared by QC inspections, safety audits, site inspections, handover | ❌ (today `inspections.checklist` is free JSON) |
 | **Share-to-portal** | Every record that a client or vendor can see carries an explicit `shared_with_client` / `shared_with_vendor` flag; nothing is visible externally by default; costs and margins are never shareable | ❌ |
-| Notifications | In-app, email, WhatsApp/SMS; per-user preferences; digest | 🟡 (channels ❌) |
-| Numbering series | Configurable document numbers per company/branch/financial year (e.g. `PO/BLR/25-26/0042`) | 🟡 (leads only) |
-| Comments and mentions | Threaded comments with @mentions on any record | ❌ |
+| Notifications | In-app, email, WhatsApp/SMS; per-user preferences; digest | ✅ in-app + bell UI; ❌ email / WhatsApp / push, preferences, digest |
+| Numbering series | Configurable document numbers per company/branch/financial year (e.g. `PO/BLR/25-26/0042`) | ✅ 18 document types, configurable patterns, atomic counters; leads migrated onto it |
+| Comments and mentions | Threaded comments with @mentions on any record | ✅ API; UI with the first detail screens |
 | Import / export | CSV/Excel import for masters (items, vendors, clients, chart of accounts, opening balances); export of any list | ❌ |
 | Print / PDF | Branded PDF templates for quotations, POs, invoices, work orders, bills, reports | ❌ |
 | Offline-tolerant site flows | Attendance, daily report, photos and inspections can be captured with poor connectivity and synced later | ❌ |
@@ -374,7 +374,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 2 | ✅ Component library: inputs, tables that become cards, filters, status pills, KPI tiles, light/dark (photo capture pending) | Consistency; avoids re-styling every module |
 | 3 | ✅ Routing and permission-aware navigation | Menus and pages appear only if the role allows |
 | 4 | ✅ CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
-| 5 | Shared backend services: numbering series, approval engine with amount thresholds, file storage, comments, notifications | Used by every document type |
+| 5 | ✅ Shared backend services: numbering series, approval engine with amount thresholds, file storage (MinIO / S3), comments, in-app notifications | Used by every document type |
 | 6 | ✅ External users: `users.client_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
 | 7 | ✅ Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
 | 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |

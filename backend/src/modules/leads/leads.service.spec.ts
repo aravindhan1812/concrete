@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LeadFollowUp } from '../../entities/lead-follow-up.entity';
 import { Lead, LeadStatus } from '../../entities/lead.entity';
+import { NumberingService } from '../numbering/numbering.service';
 import { LeadsService } from './leads.service';
 
 const mockRepo = () => ({
@@ -19,6 +20,8 @@ describe('LeadsService', () => {
   let service: LeadsService;
   let leads: ReturnType<typeof mockRepo>;
   let followUps: ReturnType<typeof mockRepo>;
+  let numbering: { next: jest.Mock };
+  const module_numbering = () => numbering;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -26,11 +29,13 @@ describe('LeadsService', () => {
         LeadsService,
         { provide: getRepositoryToken(Lead), useFactory: mockRepo },
         { provide: getRepositoryToken(LeadFollowUp), useFactory: mockRepo },
+        { provide: NumberingService, useValue: { next: jest.fn(async () => 'LD-0005') } },
       ],
     }).compile();
     service = module.get(LeadsService);
     leads = module.get(getRepositoryToken(Lead));
     followUps = module.get(getRepositoryToken(LeadFollowUp));
+    numbering = module.get(NumberingService);
   });
 
   it('creates a lead scoped to the company with a serial code', async () => {
@@ -38,7 +43,7 @@ describe('LeadsService', () => {
       title: '3BHK interior fit-out',
       contactName: 'Ravi',
     } as never);
-    expect(leads.count).toHaveBeenCalledWith({ where: { companyId: 'co-1' }, withDeleted: true });
+    expect(module_numbering().next).toHaveBeenCalledWith('co-1', 'lead');
     expect(result.code).toBe('LD-0005');
     expect(result.companyId).toBe('co-1');
     expect(result.ownerId).toBe('user-1'); // defaults to creator
@@ -47,9 +52,7 @@ describe('LeadsService', () => {
   it('throws NotFound for a lead from another tenant', async () => {
     leads.findOne.mockResolvedValue(null);
     await expect(service.findOne('co-1', 'lead-x')).rejects.toBeInstanceOf(NotFoundException);
-    expect(leads.findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'lead-x', companyId: 'co-1' } }),
-    );
+    expect(leads.findOne).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'lead-x', companyId: 'co-1' } }));
   });
 
   it('allows a legal pipeline transition (new -> contacted)', async () => {
@@ -60,16 +63,12 @@ describe('LeadsService', () => {
 
   it('rejects an illegal transition (new -> won)', async () => {
     leads.findOne.mockResolvedValue({ id: 'l1', companyId: 'co-1', status: LeadStatus.NEW });
-    await expect(
-      service.changeStatus('co-1', 'l1', { status: LeadStatus.WON }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.changeStatus('co-1', 'l1', { status: LeadStatus.WON })).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('requires a reason when marking a lead lost', async () => {
     leads.findOne.mockResolvedValue({ id: 'l1', companyId: 'co-1', status: LeadStatus.NEW });
-    await expect(
-      service.changeStatus('co-1', 'l1', { status: LeadStatus.LOST }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.changeStatus('co-1', 'l1', { status: LeadStatus.LOST })).rejects.toBeInstanceOf(BadRequestException);
     const ok = await service.changeStatus('co-1', 'l1', {
       status: LeadStatus.LOST,
       lostReason: 'Budget mismatch',
@@ -86,8 +85,6 @@ describe('LeadsService', () => {
       followUpAt: when,
     });
     expect(followUps.save).toHaveBeenCalled();
-    expect(leads.save).toHaveBeenCalledWith(
-      expect.objectContaining({ nextFollowUpAt: new Date(when) }),
-    );
+    expect(leads.save).toHaveBeenCalledWith(expect.objectContaining({ nextFollowUpAt: new Date(when) }));
   });
 });

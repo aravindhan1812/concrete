@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useViewport } from '../hooks/useMediaQuery';
 import { useSession } from '../lib/session';
 import { Icons } from './icons';
+import NotificationBell from './NotificationBell';
 import { findNav, mobileNav, NAV_GROUPS, NavItem, visibleNav } from './nav';
 
 const COLLAPSE_KEY = 'concrete.sidebar.collapsed';
@@ -59,6 +60,7 @@ export default function Shell() {
         <header className="topbar-mobile">
           <span className="brand">Concrete</span>
           <div className="topbar-actions">
+            <NotificationBell />
             <button className="icon-btn" aria-label="Toggle theme" onClick={toggleTheme}>
               {theme === 'light' ? <Icons.moon /> : <Icons.sun />}
             </button>
@@ -140,6 +142,7 @@ export default function Shell() {
           })}
         </div>
         <div className="sidebar-bottom">
+          <NotificationBell withLabel />
           <button className="nav-item" onClick={toggleTheme} title={theme === 'light' ? 'Dark mode' : 'Light mode'}>
             {theme === 'light' ? <Icons.moon /> : <Icons.sun />}
             <span className="nav-label">{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>

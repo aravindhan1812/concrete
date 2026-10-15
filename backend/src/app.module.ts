@@ -3,14 +3,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { EntityAccessModule } from './common/entity-access/entity-access.service';
 import { AudienceGuard } from './common/guards/audience.guard';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { AccountingModule } from './modules/accounting/accounting.module';
+import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { FilesModule } from './modules/files/files.module';
 import { LeadsModule } from './modules/leads/leads.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { NumberingModule } from './modules/numbering/numbering.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -27,6 +33,13 @@ import { UsersModule } from './modules/users/users.module';
       }),
     }),
     AuditModule,
+    // Shared services (global): numbering, notifications, approvals, entity access
+    NumberingModule,
+    NotificationsModule,
+    ApprovalsModule,
+    EntityAccessModule,
+    FilesModule,
+    CommentsModule,
     AccountingModule,
     AuthModule,
     RbacModule,

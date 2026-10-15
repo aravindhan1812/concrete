@@ -47,6 +47,7 @@ export const Icons = {
   camera: (p: P) => <svg {...base(p)}><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>,
   arrowUp: (p: P) => <svg {...base(p)}><path d="M12 19V5M6 11l6-6 6 6" /></svg>,
   arrowDown: (p: P) => <svg {...base(p)}><path d="M12 5v14M6 13l6 6 6-6" /></svg>,
+  bell: (p: P) => <svg {...base(p)}><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20a2 2 0 0 0 4 0" /></svg>,
   inbox: (p: P) => <svg {...base(p)}><path d="M4 4h16v16H4z" /><path d="M4 14h5l1.5 2h3l1.5-2h5" /></svg>,
 };
 

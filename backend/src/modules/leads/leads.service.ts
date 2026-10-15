@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { LeadFollowUp } from '../../entities/lead-follow-up.entity';
 import { Lead, LEAD_TRANSITIONS, LeadStatus } from '../../entities/lead.entity';
+import { NumberingService } from '../numbering/numbering.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { ChangeStatusDto, CreateFollowUpDto, QueryLeadsDto, UpdateLeadDto } from './dto/update-lead.dto';
 
@@ -11,6 +12,7 @@ export class LeadsService {
   constructor(
     @InjectRepository(Lead) private readonly leads: Repository<Lead>,
     @InjectRepository(LeadFollowUp) private readonly followUps: Repository<LeadFollowUp>,
+    private readonly numbering: NumberingService,
   ) {}
 
   /** Every query is scoped by companyId — tenant isolation is enforced here, not trusted from the client. */
@@ -49,7 +51,7 @@ export class LeadsService {
       createdBy: userId,
       ownerId: dto.ownerId ?? userId,
       nextFollowUpAt: dto.nextFollowUpAt ? new Date(dto.nextFollowUpAt) : undefined,
-      code: await this.nextCode(companyId),
+      code: await this.numbering.next(companyId, 'lead'),
     });
     return this.leads.save(lead);
   }
@@ -117,8 +119,4 @@ export class LeadsService {
     return rows.map((r) => ({ status: r.status, count: Number(r.count), value: Number(r.value ?? 0) }));
   }
 
-  private async nextCode(companyId: string): Promise<string> {
-    const count = await this.leads.count({ where: { companyId }, withDeleted: true });
-    return `LD-${String(count + 1).padStart(4, '0')}`;
-  }
 }

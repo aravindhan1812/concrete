@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes, useEffect, useId } from 'react';
 import { Icons, IconName } from '../app/icons';
 
@@ -198,7 +199,9 @@ export function Dialog({ title, onClose, children, footer, wide }: { title: stri
       document.body.style.overflow = prev;
     };
   }, [onClose]);
-  return (
+  // Portal to <body> so a dialog opened from a sticky/clipped container (top bar, sidebar) is never
+  // trapped in that container's stacking context or overflow.
+  return createPortal(
     <div className="dialog-backdrop" onClick={onClose}>
       <div className={`dialog${wide ? ' wide' : ''}`} role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="dialog-head">
@@ -209,7 +212,8 @@ export function Dialog({ title, onClose, children, footer, wide }: { title: stri
         <div className="dialog-body">{children}</div>
         {footer && <div className="dialog-foot">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

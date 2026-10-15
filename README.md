@@ -22,7 +22,8 @@ docker compose up --build
 
 - Web: http://localhost:5173 — register a company, then work the leads board.
 - API: http://localhost:3000/api/v1
-- Postgres loads `schema.sql` + `seed.sql` automatically on first start.
+- Postgres loads `schema.sql` + `seed.sql` automatically on first start; the API applies later migrations when it starts.
+- MinIO (S3-compatible file storage): API on http://localhost:9000, console on http://localhost:9001 (`concrete` / `concrete-secret`).
 
 ## Run for development
 

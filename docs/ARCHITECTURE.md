@@ -45,6 +45,10 @@ Concrete is a multi-tenant SaaS ERP for construction and interior contractors. O
 | AI features | Async `ai_jobs` queue with `input/output` JSONB | LLM/vision calls are slow and fallible; never block a user request on them |
 | Deletes | Soft (`deleted_at`) on business entities | ERP data is legal/financial history |
 | Ledger | Double-entry; balance, period locks and immutability enforced by Postgres triggers as well as the service | A bug in any module cannot leave the books unbalanced or rewrite history |
+| Shared services | Numbering, approvals, notifications and entity access are global Nest modules; other modules inject them | One implementation of each cross-cutting concern; modules stay small |
+| Files | Browser → object storage via presigned PUT; API stores metadata only | Large drawings and phone photos never stream through the API |
+| Attachments & comments access | Follows the record they belong to (`ENTITY_REGISTRY`: entity type → table + read permissions, tenant check) | No separate permission model to keep in sync |
+| Schema drift | `npm run schema:check` in CI compares every entity column with the migrated database | Catches an entity that no longer matches the SQL-owned schema |
 | Posting rules | `accounts.system_key` maps each rule target (`ar_control`, `output_gst`, …) to one ledger per company | Companies rename / restructure their chart without touching code |
 
 ## 3. Domain map (schema sections → modules)
@@ -100,6 +104,14 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `POST /accounting/journals/:id/reverse` | `finance.ledger.post` | Mirror-image entry linked both ways; the original becomes `reversed` |
 | `GET /accounting/reports/trial-balance` | `finance.ledger.read` | `from`/`to`; opening carried from before `from` |
 | `GET /accounting/reports/ledger/:accountId` | `finance.ledger.read` | Account statement with running balance |
+| `GET /admin/numbering` · `PUT /admin/numbering/:docType` | `admin.settings.manage` | Document number series: prefix, pattern (`{PREFIX}` `{FY}` `{YYYY}` `{MM}` `{BRANCH}` `{SEQ:n}`), yearly or never reset |
+| `GET /approvals?box=inbox\|mine\|all` | authenticated (`all` needs `approvals.read`) | Requests waiting on my roles / raised by me / everything |
+| `GET /approvals/:id` · `POST /approvals/:id/decide` · `/cancel` | approver of the current step / requester | Reject needs a reason; requesters can't approve their own |
+| `GET/POST /approvals/rules` · `PATCH /approvals/rules/:id` | `approvals.rules.manage` | Entity type + amount band → approver role per step |
+| `POST /files/uploads` → `PUT <presigned url>` → `POST /files/:id/complete` | read access to the attached record | Direct-to-storage upload; type allowlist, 100 MB cap, optional GPS + capture time |
+| `GET /files?entityType&entityId` · `GET /files/:id/url` · `DELETE /files/:id` | read access to the record | Short-lived presigned download URL; soft delete |
+| `GET/POST /comments` · `PATCH/DELETE /comments/:id` | read access to the record (edit/delete own) | Threaded replies; @mentions notify staff of the same company |
+| `GET /notifications` · `/unread-count` · `POST /notifications/:id/read` · `/read-all` | own (staff and portal) | In-app notifications |
 | `GET /crm/leads` | `crm.leads.read` | Filter: `status`, `search` (title/contact/phone), paginated |
 | `GET /crm/leads/stats` | `crm.leads.read` or `reports.read` | Count + pipeline value by status |
 | `GET /crm/leads/:id` | `crm.leads.read` | Includes follow-ups |

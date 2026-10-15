@@ -82,3 +82,5 @@ jobs:
         run: npm run migrate | tee out.txt && grep -q "No pending migrations" out.txt
       - name: Status
         run: npm run migrate -- status
+      - name: Entities match the migrated schema
+        run: npm run schema:check
