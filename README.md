@@ -6,6 +6,7 @@ AI-powered Construction & Interior Project Management SaaS — Phase 0 foundatio
 
 | Piece | Where | Status |
 |---|---|---|
+| **Product scope, gaps and delivery plan** | `docs/SCOPE.md` | ✅ |
 | Architecture & API design | `docs/ARCHITECTURE.md` | ✅ |
 | Complete database schema (82 tables, all 13 modules) | `database/schema.sql` | ✅ |
 | Permission catalog + 11 role templates | `database/seed.sql` | ✅ |
@@ -44,7 +45,11 @@ cd backend && npm test
 
 Covers tenant scoping, the lead pipeline state machine (illegal moves rejected, lost requires a reason), login, and refresh-token rotation.
 
-## What's next (Phases 1–4)
+## What's next
+
+The full scope and phased plan live in [`docs/SCOPE.md`](docs/SCOPE.md). The summary below is the original Phase 0 roadmap.
+
+### Original roadmap (Phases 1–4)
 
 1. **Core loop**: customers, quotations → BOQ → project conversion, tasks/milestones.
 2. **Site + procurement**: daily reports, attendance, MR → RFQ → PO → GRN → stock.
