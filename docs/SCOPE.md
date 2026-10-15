@@ -353,7 +353,98 @@ Each phase ends with working, tested screens — not just APIs.
 
 ---
 
-## 10. Open questions
+## 10. Prioritised backlog
+
+Ordered by dependency first and business value second; each item builds on the ones before it. This is the working backlog — update it as items ship.
+
+### P0 — Foundation (blocks everything else)
+
+| # | Item | Why first |
+|---|---|---|
+| 1 | Responsive app shell: bottom navigation on phones, collapsible sidebar on tablets, full sidebar on desktop; installable PWA | Phones currently have no navigation; every later screen sits inside this |
+| 2 | Component library: inputs, tables that become cards, filters, status pills, KPI tiles, file/photo capture, light/dark | Consistency; avoids re-styling every module |
+| 3 | Routing and permission-aware navigation | Menus and pages appear only if the role allows |
+| 4 | CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
+| 5 | Shared backend services: numbering series, approval engine with amount thresholds, file storage, comments, notifications | Used by every document type |
+| 6 | External users: `users.customer_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
+| 7 | Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
+| 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
+
+### P1 — Core business flow (enquiry → first invoice)
+
+| # | Item |
+|---|---|
+| 9 | Customers and contacts; lead → customer conversion |
+| 10 | Item master, units, categories, cost codes |
+| 11 | Quotations with versions; BOQ with rate analysis |
+| 12 | Quotation → project conversion; milestones, WBS, tasks |
+| 13 | Gantt, baseline schedule, progress against BOQ quantities |
+| 14 | Drawings: register, revisions, transmittals, RFIs, in-browser viewer |
+| 15 | Change orders / variations updating BOQ, budget and schedule |
+| 16 | Client invoicing (advance/progress/final, GST, retention) and receipts, posting to the ledger |
+| 17 | Dashboards: Owner, Project Manager, Sales |
+
+### P2 — Site and supply chain
+
+| # | Item |
+|---|---|
+| 18 | Site: daily reports with work done by BOQ item, GPS attendance, issues, photos; poor-connectivity capture |
+| 19 | Vendors: types, onboarding/approval, compliance documents with expiry, contacts, bank accounts, rate contracts |
+| 20 | Procurement: material requests → RFQ comparison → PO → GRN → 3-way match → vendor payment (ledger posting) |
+| 21 | Inventory: ledger, site stores, issues, transfers, reorder alerts, audits |
+| 22 | Materials planning from BOQ and schedule; consumption reconciliation |
+| 23 | Subcontractors: work orders, measurement, RA bills, retention and advance recovery |
+| 24 | Checklist engine, then QC: inspection requests, material tests, NCRs, snagging |
+| 25 | Safety: incidents/near-misses, permits to work, toolbox talks, PPE register, certificate expiry |
+| 26 | Tools and assets: QR tags, check-out/in, maintenance, fuel/hour logs |
+| 27 | Dashboards: Site Engineer, Purchase, Store, QC, Safety |
+
+### P3 — People and complete accounting
+
+| # | Item |
+|---|---|
+| 28 | Employees, labour, leave, overtime, advances |
+| 29 | Payroll with PF/ESI/PT/TDS, posting to the ledger |
+| 30 | Banking: statement import, reconciliation, cheque register |
+| 31 | GST reports (GSTR-1/3B summaries) and full TDS process |
+| 32 | Expenses and petty cash with bill photos |
+| 33 | Depreciation posting, WIP revenue, retention release |
+| 34 | Financial reports (trial balance, P&L, balance sheet, cash flow, ageing, project P&L); Tally export; opening-balance import |
+| 35 | Dashboards: Finance, HR |
+
+### P4 — Portals
+
+| # | Item |
+|---|---|
+| 36 | Client portal: progress, photos, approvals (quotations, change orders, drawings, selections), invoices, snags, handover pack, messages |
+| 37 | Vendor portal: self-registration, PO/work-order acceptance, quote responses, invoice and bill upload, payment status |
+| 38 | Online payments; WhatsApp/email notifications |
+
+### P5 — AI and analytics
+
+| # | Item |
+|---|---|
+| 39 | AI action catalog with propose → approve flow and AI actor in the audit log |
+| 40 | Document extraction: vendor invoices, RA bills, expense photos |
+| 41 | Daily report drafting from photos and notes; task progress updates from reports |
+| 42 | Project schedule from BOQ; material planning |
+| 43 | BOQ from drawings |
+| 44 | Natural-language analysis with charts, scoped to permissions |
+| 45 | Delay, cost-overrun and cash-flow predictions; hazard and PPE detection |
+| 46 | Report builder and scheduled reports |
+
+### Continuous (every phase)
+
+- Tenant-isolation tests for each module
+- Every screen checked at 375 / 768 / 1280 px
+- Security review before any real customer data
+- Import tools (Excel, Tally)
+
+**Why this order:** the ledger is in P0 because adding it after invoices and POs exist means reworking every money document; the client portal waits for P4 because it surfaces data from projects, invoicing, drawings and QC; AI comes last because its actions call the same features built in P1–P4.
+
+---
+
+## 11. Open questions
 
 1. **Target customer size** — small interior firms, mid-size builders, or both? Affects default approval and procurement depth.
 2. **Payroll depth** — full statutory payroll inside Concrete, or attendance + wage calculation exported to a payroll provider?
