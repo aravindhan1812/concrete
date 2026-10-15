@@ -18,7 +18,9 @@ services:
       retries: 10
 
   api:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       DATABASE_URL: postgres://concrete:concrete@db:5432/concrete
       JWT_ACCESS_SECRET: dev-access-secret-change-in-prod

@@ -7,7 +7,6 @@ import { createHash, randomBytes } from 'crypto';
 import { DataSource, IsNull, MoreThan, Repository } from 'typeorm';
 import { AuditService } from '../audit/audit.service';
 import { Company } from '../../entities/company.entity';
-import { Permission } from '../../entities/permission.entity';
 import { RefreshToken } from '../../entities/refresh-token.entity';
 import { Role } from '../../entities/role.entity';
 import { User } from '../../entities/user.entity';

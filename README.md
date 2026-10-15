@@ -37,11 +37,25 @@ cd backend && cp .env.example .env && npm install && npm run start:dev
 cd frontend && npm install && npm run dev
 ```
 
-## Tests
+## Checks (what CI runs)
 
 ```bash
-cd backend && npm test
+cd backend  && npm run lint && npm run typecheck && npm test && npm run build
+cd frontend && npm run lint && npm run typecheck && npm run build
 ```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs these on every push, plus applies the database baseline and all migrations to a fresh Postgres.
+
+## Database migrations
+
+`database/schema.sql` + `seed.sql` are the baseline; every later change is a numbered file in `database/migrations/` (see the README there).
+
+```bash
+cd backend && DATABASE_URL=postgres://concrete:concrete@localhost:5432/concrete npm run migrate
+npm run migrate -- status
+```
+
+The API container runs pending migrations before it starts.
 
 Covers tenant scoping, the lead pipeline state machine (illegal moves rejected, lost requires a reason), login, and refresh-token rotation.
 
