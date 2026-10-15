@@ -37,12 +37,12 @@ Role templates are cloned into each company at signup and can be edited freely (
 | Store Manager | Goods receipts, issues, transfers, stock audits, tools | Tablet + phone |
 | Finance / Accountant | Accounting, invoicing, payments, GST/TDS, reports | Desktop |
 | HR | Employees, labour, leave, payroll | Desktop |
-| Sales Executive | Leads, customers, quotations | Phone + desktop |
+| Sales Executive | Leads, clients, quotations | Phone + desktop |
 | Designer / Architect *(new template)* | Drawings, revisions, client selections | Desktop |
 | **Client** (external) | Client portal — own projects only | **Phone** |
 | **Vendor / Subcontractor** (external) | Vendor portal — own POs, work orders, bills | **Phone** |
 
-**External users.** A user record links to *either* a customer or a vendor (`users.customer_id` / `users.vendor_id`, mutually exclusive, both null for staff). Every route declares an audience; routes without one serve staff only, so a portal login can never reach an internal endpoint, and portal routes scope their queries by the linked id. ✅ *Built: migration `0001_external_users`, `AudienceGuard`, `kind` in the JWT, `portal.client` / `portal.vendor` permissions on the Client and Vendor templates, and `/admin/users` to create and manage logins.*
+**External users.** A user record links to *either* a client or a vendor (`users.client_id` / `users.vendor_id`, mutually exclusive, both null for staff). Every route declares an audience; routes without one serve staff only, so a portal login can never reach an internal endpoint, and portal routes scope their queries by the linked id. ✅ *Built: migration `0001_external_users`, `AudienceGuard`, `kind` in the JWT, `portal.client` / `portal.vendor` permissions on the Client and Vendor templates, and `/admin/users` to create and manage logins.*
 
 ---
 
@@ -64,7 +64,7 @@ These are shared by every module and are built once.
 | Notifications | In-app, email, WhatsApp/SMS; per-user preferences; digest | 🟡 (channels ❌) |
 | Numbering series | Configurable document numbers per company/branch/financial year (e.g. `PO/BLR/25-26/0042`) | 🟡 (leads only) |
 | Comments and mentions | Threaded comments with @mentions on any record | ❌ |
-| Import / export | CSV/Excel import for masters (items, vendors, customers, chart of accounts, opening balances); export of any list | ❌ |
+| Import / export | CSV/Excel import for masters (items, vendors, clients, chart of accounts, opening balances); export of any list | ❌ |
 | Print / PDF | Branded PDF templates for quotations, POs, invoices, work orders, bills, reports | ❌ |
 | Offline-tolerant site flows | Attendance, daily report, photos and inspections can be captured with poor connectivity and synced later | ❌ |
 | Localisation | INR + lakh/crore formatting, Indian financial year (Apr–Mar), English first; UI strings externalised for future languages (Hindi, Tamil, …) | ❌ |
@@ -94,9 +94,11 @@ Rules:
 
 ### 5.1 CRM
 
-Leads with an enforced pipeline (`new → contacted → site_visit → quotation → negotiation → won/lost`), follow-ups, customers, contacts, meetings, notes, lead sources and campaigns, conversion of a won lead into a customer + quotation.
+**Naming:** the paying party is a *client*; a client can have many *projects*. ("Customer" is not used in the product.)
 
-**Status / gaps:** ✅ leads (API, pipeline, follow-ups, board UI). 🟡 customers, contacts, meetings, notes. ❌ lead-to-customer conversion flow, lead source/campaign reporting.
+Leads with an enforced pipeline (`new → contacted → site_visit → quotation → negotiation → won/lost`), follow-ups, clients, contacts, meetings, notes, lead sources and campaigns, conversion of a won lead into a client + quotation. **Client credit**: credit limit and terms per client, outstanding receivables against the limit, overdue alerts, and a hold on new work or invoices when the limit is breached (derived from the ledger).
+
+**Status / gaps:** ✅ leads (API, pipeline, follow-ups, board UI). 🟡 clients, contacts, meetings, notes. ❌ lead-to-client conversion flow, lead source/campaign reporting.
 
 ### 5.2 Sales — quotations, BOQ, change orders
 
@@ -173,10 +175,17 @@ RFQs to multiple vendors → quote comparison grid → PO (with approval thresho
 - **Contacts** (multiple per vendor) and bank accounts.
 - **Rate contracts**: item-wise agreed rates with validity, auto-applied on PO and RFQ comparison.
 - **Subcontractor work orders**: scope, BOQ-linked rates, measurement of work done, **running-account (RA) bills**, retention, advance recovery, debit notes (wastage, damage, material supplied by us), final bill.
-- **Vendor ledger**: payables, ageing, advances, debit/credit notes, TDS section and rate, MSME 45-day payment tracking.
+- **Credit management** (derived from the ledger, never a separate number):
+  - Credit terms per vendor: credit days, **credit limit**, advance-payment-only flag, early-payment discount terms.
+  - Credit utilisation: outstanding payables against the limit, updated by every bill and payment; a PO that would breach the limit is blocked or routed for extra approval.
+  - Due-date tracking from credit days; payables calendar (due this week) and ageing buckets (0–30 / 31–60 / 60+).
+  - Credit notes received (returns, short supply, rate difference, damage) and debit notes raised, applied against later bills.
+  - Advances paid and recovered across bills.
+  - MSME vendors flagged separately for the 45-day payment rule.
+- **Vendor ledger**: payables, ageing, advances, debit/credit notes, TDS section and rate — the credit position above is a view over it.
 - **Performance scoring** from real data: on-time delivery and rejection rate (from GRNs), price vs other quotes, snag count (from QC), plus manual ratings → combined score used in vendor selection.
 
-**Status / gaps:** 🟡 vendors, bank accounts, contracts (value only), ratings (manual). ❌ types, onboarding status, compliance documents, contacts, rate contracts, work orders, RA bills, computed scoring, user–vendor link.
+**Status / gaps:** 🟡 vendors (payment terms, credit days), bank accounts, contracts (value only), ratings (manual). ✅ user–vendor link. ❌ types, onboarding status, compliance documents, contacts, rate contracts, credit limits and utilisation, credit/debit notes, work orders, RA bills, computed scoring.
 
 ### 5.11 Inventory
 
@@ -205,7 +214,7 @@ Concrete is the **system of record for the books**. Every financial document pos
 - **Chart of accounts**: hierarchical groups (Assets, Liabilities, Equity, Income, Expenses → sub-groups → ledgers), seeded with an Indian contractor template, fully editable.
 - **Journal entries**: header + lines; every entry must balance (sum of debits = sum of credits), enforced in the database and the service layer.
 - **Dimensions on every line**: branch, **project**, cost code (MAT/LAB/EQP/SUB/OH), and optionally cost centre — so project P&L comes straight from the ledger.
-- **Sub-ledgers**: customers (receivables) and vendors (payables) are party ledgers under control accounts, with bill-by-bill tracking (which payment settled which invoice).
+- **Sub-ledgers**: clients (receivables) and vendors (payables) are party ledgers under control accounts, with bill-by-bill tracking (which payment settled which invoice).
 - **Voucher types**: sales, purchase, receipt, payment, contra, journal, debit note, credit note — each with its own numbering series.
 - **Financial years and periods**: Indian FY (Apr–Mar) by default; period locking so closed months cannot be changed; year-end closing entry carrying profit to reserves.
 - **Opening balances** import for companies migrating from Tally/Zoho/Excel.
@@ -215,10 +224,10 @@ Concrete is the **system of record for the books**. Every financial document pos
 
 | Source document | Debit | Credit |
 |---|---|---|
-| Client invoice (progress/final) | Customer receivable | Contract revenue; Output GST; Retention receivable split out |
-| Client advance received | Bank | Customer advance (liability) |
-| Advance adjusted in invoice | Customer advance | Customer receivable |
-| Payment received | Bank; TDS receivable | Customer receivable |
+| Client invoice (progress/final) | Client receivable | Contract revenue; Output GST; Retention receivable split out |
+| Client advance received | Bank | Client advance (liability) |
+| Advance adjusted in invoice | Client advance | Client receivable |
+| Payment received | Bank; TDS receivable | Client receivable |
 | GRN (goods received, not invoiced) | Inventory / project material cost | GRN clearing (liability) |
 | Vendor invoice | GRN clearing; Input GST | Vendor payable; TDS payable |
 | Subcontractor RA bill | Project subcontract cost; Input GST | Subcontractor payable; Retention payable; TDS payable; advance recovered |
@@ -259,7 +268,7 @@ Concrete is the **system of record for the books**. Every financial document pos
 - Only records explicitly shared with the client are visible; internal costs and margins are never exposed.
 - Designed for phones first.
 
-**Status / gaps:** 🟡 "Client" role template. ❌ user–customer link, share flags, all portal screens, online payments.
+**Status / gaps:** 🟡 "Client" role template. ❌ user–client link, share flags, all portal screens, online payments.
 
 ### 5.16 Vendor portal
 
@@ -344,8 +353,8 @@ Each phase ends with working, tested screens — not just APIs.
 
 | Phase | Scope |
 |---|---|
-| **1. Foundation** | Responsive app shell (phone/tablet/desktop), component library, dashboard framework; schema additions: external-user link (customer/vendor), share flags, checklist engine, drawings, vendor types/onboarding/compliance/rate contracts/work orders/RA bills, QC and safety tables, **double-entry ledger** (chart of accounts, journals, voucher types, financial years, posting-rule mapping), AI actions and proposed change sets; new role templates (QC Engineer, Safety Officer, Designer) and permissions |
-| **2. Core flow** | Customers and contacts, lead → customer conversion, quotations, BOQ, rate analysis, change orders, project conversion, WBS, milestones, tasks, Gantt; drawings register, revisions, transmittals, RFIs |
+| **1. Foundation** | Responsive app shell (phone/tablet/desktop), component library, dashboard framework; schema additions: external-user link (client/vendor), share flags, checklist engine, drawings, vendor types/onboarding/compliance/rate contracts/work orders/RA bills, QC and safety tables, **double-entry ledger** (chart of accounts, journals, voucher types, financial years, posting-rule mapping), AI actions and proposed change sets; new role templates (QC Engineer, Safety Officer, Designer) and permissions |
+| **2. Core flow** | Clients and contacts, lead → client conversion, quotations, BOQ, rate analysis, change orders, project conversion, WBS, milestones, tasks, Gantt; drawings register, revisions, transmittals, RFIs |
 | **3. Site, quality, safety, supply chain** | Daily reports, attendance, issues; QC inspections, tests, NCRs, snags; safety incidents, permits, toolbox talks; MRP, material requests, RFQs, POs, GRNs; vendors and subcontractors (onboarding, rate contracts, work orders, RA bills); inventory and transfers; tools and assets |
 | **4. People and accounting** | HR, labour, leave, payroll; full accounting: posting rules for every document, banking and reconciliation, GST and TDS, retention and advances, WIP, financial and project reports, Tally export |
 | **5. Portals** | Client portal and vendor portal (phone first), online payments |
@@ -366,7 +375,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 3 | ✅ Routing and permission-aware navigation | Menus and pages appear only if the role allows |
 | 4 | ✅ CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
 | 5 | Shared backend services: numbering series, approval engine with amount thresholds, file storage, comments, notifications | Used by every document type |
-| 6 | ✅ External users: `users.customer_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
+| 6 | ✅ External users: `users.client_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
 | 7 | ✅ Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
 | 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
 
@@ -374,7 +383,7 @@ Ordered by dependency first and business value second; each item builds on the o
 
 | # | Item |
 |---|---|
-| 9 | Customers and contacts; lead → customer conversion |
+| 9 | Clients and contacts; lead → client conversion; client credit limits and terms |
 | 10 | Item master, units, categories, cost codes |
 | 11 | Quotations with versions; BOQ with rate analysis |
 | 12 | Quotation → project conversion; milestones, WBS, tasks |
@@ -389,7 +398,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | # | Item |
 |---|---|
 | 18 | Site: daily reports with work done by BOQ item, GPS attendance, issues, photos; poor-connectivity capture |
-| 19 | Vendors: types, onboarding/approval, compliance documents with expiry, contacts, bank accounts, rate contracts |
+| 19 | Vendors: types, onboarding/approval, compliance documents with expiry, contacts, bank accounts, rate contracts, **credit management** (limits, utilisation, due dates, ageing, credit/debit notes, advances, MSME flag) |
 | 20 | Procurement: material requests → RFQ comparison → PO → GRN → 3-way match → vendor payment (ledger posting) |
 | 21 | Inventory: ledger, site stores, issues, transfers, reorder alerts, audits |
 | 22 | Materials planning from BOQ and schedule; consumption reconciliation |

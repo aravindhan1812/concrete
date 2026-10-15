@@ -12,7 +12,7 @@ interface JwtPayload {
   roles: string[];
   permissions: string[];
   kind?: UserKind;
-  customerId?: string;
+  clientId?: string;
   vendorId?: string;
 }
 
@@ -35,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
       kind: payload.kind ?? 'staff',
-      customerId: payload.customerId,
+      clientId: payload.clientId,
       vendorId: payload.vendorId,
     };
   }

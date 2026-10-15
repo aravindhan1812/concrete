@@ -126,7 +126,7 @@ export class AuthService {
         roles: (user.roles ?? []).map((r) => r.name),
         permissions,
         kind: userKind(user),
-        customerId: user.customerId ?? undefined,
+        clientId: user.clientId ?? undefined,
         vendorId: user.vendorId ?? undefined,
       },
       {
@@ -164,7 +164,7 @@ export class AuthService {
       roles: (user.roles ?? []).map((r) => r.name),
       permissions: this.collectPermissions(user),
       kind: userKind(user),
-      customerId: user.customerId ?? undefined,
+      clientId: user.clientId ?? undefined,
       vendorId: user.vendorId ?? undefined,
     };
   }

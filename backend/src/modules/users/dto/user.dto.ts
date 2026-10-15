@@ -8,8 +8,8 @@ export class CreateUserDto {
   @IsString() @MinLength(8) password: string;
   @IsArray() @ArrayNotEmpty() @IsUUID('4', { each: true }) roleIds: string[];
   @IsOptional() @IsUUID() branchId?: string;
-  /** Exactly one of customerId / vendorId makes this an external (portal) login. */
-  @IsOptional() @IsUUID() customerId?: string;
+  /** Exactly one of clientId / vendorId makes this an external (portal) login. */
+  @IsOptional() @IsUUID() clientId?: string;
   @IsOptional() @IsUUID() vendorId?: string;
 }
 
@@ -18,7 +18,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 }
 
 export class QueryUsersDto {
-  @IsOptional() @IsString() kind?: 'staff' | 'customer' | 'vendor';
+  @IsOptional() @IsString() kind?: 'staff' | 'client' | 'vendor';
   @IsOptional() @IsString() search?: string;
   @IsOptional() page?: number;
   @IsOptional() pageSize?: number;

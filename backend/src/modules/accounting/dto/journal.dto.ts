@@ -10,7 +10,7 @@ export class JournalLineDto {
   @IsOptional() @IsString() systemKey?: string;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) debit?: number;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) credit?: number;
-  @IsOptional() @IsIn(['customer', 'vendor', 'employee']) partyType?: 'customer' | 'vendor' | 'employee';
+  @IsOptional() @IsIn(['client', 'vendor', 'employee']) partyType?: 'client' | 'vendor' | 'employee';
   @IsOptional() @IsUUID() partyId?: string;
   @IsOptional() @IsUUID() branchId?: string;
   @IsOptional() @IsUUID() projectId?: string;
@@ -51,7 +51,7 @@ export class CreateAccountDto {
   @IsIn(['asset', 'liability', 'equity', 'income', 'expense']) type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
   @IsOptional() @IsUUID() parentId?: string;
   @IsOptional() @IsBoolean() isGroup?: boolean;
-  @IsOptional() @IsIn(['customer', 'vendor', 'employee']) partyLedger?: 'customer' | 'vendor' | 'employee';
+  @IsOptional() @IsIn(['client', 'vendor', 'employee']) partyLedger?: 'client' | 'vendor' | 'employee';
 }
 
 export class UpdateAccountDto {

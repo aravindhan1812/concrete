@@ -8,7 +8,7 @@ const acct = (over: Partial<Account>): Account =>
 
 const accounts: Account[] = [
   acct({ id: 'bank', code: '1121', name: 'Main Bank', systemKey: 'bank' }),
-  acct({ id: 'ar', code: '1130', name: 'Accounts Receivable', systemKey: 'ar_control', partyLedger: 'customer' }),
+  acct({ id: 'ar', code: '1130', name: 'Accounts Receivable', systemKey: 'ar_control', partyLedger: 'client' }),
   acct({ id: 'rev', code: '4100', name: 'Contract Revenue', type: 'income', systemKey: 'contract_revenue' }),
   acct({ id: 'gst', code: '2130', name: 'Output GST', type: 'liability', systemKey: 'output_gst' }),
   acct({ id: 'grp', code: '1100', name: 'Current Assets', isGroup: true }),
@@ -26,7 +26,7 @@ describe('validateJournalLines', () => {
       accounts,
     );
     expect(lines.map((l) => l.accountId)).toEqual(['ar', 'rev', 'gst']);
-    expect(lines[0].partyType).toBe('customer');
+    expect(lines[0].partyType).toBe('client');
     expect(lines[0].debit).toBe(11800000); // paise
   });
 
@@ -53,7 +53,7 @@ describe('validateJournalLines', () => {
   it('requires a party on party ledgers and rejects the wrong party type', () => {
     expect(() => validateJournalLines([{ accountId: 'ar', debit: 1 }, { accountId: 'rev', credit: 1 }], accounts)).toThrow(/needs a partyId/);
     expect(() => validateJournalLines([{ accountId: 'ar', debit: 1, partyId: 'v1', partyType: 'vendor' }, { accountId: 'rev', credit: 1 }], accounts)).toThrow(
-      /takes customer parties/,
+      /takes client parties/,
     );
   });
 

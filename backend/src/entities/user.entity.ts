@@ -12,7 +12,7 @@ export class User {
   @ManyToOne(() => Company) @JoinColumn({ name: 'company_id' }) company: Company;
   @Column({ name: 'branch_id', nullable: true }) branchId?: string;
   /** External logins: exactly one of these is set (DB CHECK enforces mutual exclusion). */
-  @Column({ name: 'customer_id', nullable: true }) customerId?: string;
+  @Column({ name: 'client_id', nullable: true }) clientId?: string;
   @Column({ name: 'vendor_id', nullable: true }) vendorId?: string;
   @Column({ type: 'citext', nullable: true }) email?: string;
   @Column({ nullable: true }) phone?: string;

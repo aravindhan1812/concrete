@@ -44,7 +44,7 @@ export class Lead {
   @Column({ type: 'text', default: LeadStatus.NEW }) status: LeadStatus;
   @Column({ name: 'lost_reason', nullable: true }) lostReason?: string;
   @Column({ name: 'owner_id', nullable: true }) ownerId?: string;
-  @Column({ name: 'customer_id', nullable: true }) customerId?: string;
+  @Column({ name: 'client_id', nullable: true }) clientId?: string;
   @Column({ name: 'next_follow_up_at', type: 'timestamptz', nullable: true }) nextFollowUpAt?: Date;
   @Column({ nullable: true }) notes?: string;
   @Column({ name: 'created_by', nullable: true }) createdBy?: string;

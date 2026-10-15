@@ -2,20 +2,20 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { ILike, In, IsNull, Not, Repository } from 'typeorm';
-import { Customer } from '../../entities/customer.entity';
+import { Client } from '../../entities/client.entity';
 import { Role } from '../../entities/role.entity';
 import { User } from '../../entities/user.entity';
 import { Vendor } from '../../entities/vendor.entity';
 import { userKind } from '../../common/types';
 import { CreateUserDto, QueryUsersDto, UpdateUserDto } from './dto/user.dto';
 
-/** Company user administration: staff logins and external (customer / vendor) portal logins. */
+/** Company user administration: staff logins and external (client / vendor) portal logins. */
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Role) private readonly roles: Repository<Role>,
-    @InjectRepository(Customer) private readonly customers: Repository<Customer>,
+    @InjectRepository(Client) private readonly clients: Repository<Client>,
     @InjectRepository(Vendor) private readonly vendors: Repository<Vendor>,
   ) {}
 
@@ -23,10 +23,10 @@ export class UsersService {
     const page = Math.max(1, Number(q.page ?? 1));
     const pageSize = Math.min(100, Math.max(1, Number(q.pageSize ?? 20)));
     const base: Record<string, unknown> = { companyId };
-    if (q.kind === 'customer') base.customerId = Not(IsNull());
+    if (q.kind === 'client') base.clientId = Not(IsNull());
     if (q.kind === 'vendor') base.vendorId = Not(IsNull());
     if (q.kind === 'staff') {
-      base.customerId = IsNull();
+      base.clientId = IsNull();
       base.vendorId = IsNull();
     }
     const where = q.search ? [{ ...base, fullName: ILike(`%${q.search}%`) }, { ...base, email: ILike(`%${q.search}%`) }] : [base];
@@ -58,7 +58,7 @@ export class UsersService {
         email: dto.email,
         phone: dto.phone,
         branchId: dto.branchId,
-        customerId: dto.customerId,
+        clientId: dto.clientId,
         vendorId: dto.vendorId,
         passwordHash: await bcrypt.hash(dto.password, 10),
         roles,
@@ -71,9 +71,9 @@ export class UsersService {
     const user = await this.users.findOne({ where: { id, companyId } });
     if (!user) throw new NotFoundException('User not found');
     // The external link is fixed at creation: converting a staff login into a portal login (or
-    // moving it to another customer) is a new account, not an edit.
-    if ((dto.customerId && dto.customerId !== user.customerId) || (dto.vendorId && dto.vendorId !== user.vendorId)) {
-      throw new BadRequestException('customerId / vendorId cannot be changed after creation');
+    // moving it to another client) is a new account, not an edit.
+    if ((dto.clientId && dto.clientId !== user.clientId) || (dto.vendorId && dto.vendorId !== user.vendorId)) {
+      throw new BadRequestException('clientId / vendorId cannot be changed after creation');
     }
     if (dto.roleIds) user.roles = await this.resolveRoles(companyId, dto.roleIds);
     if (dto.fullName !== undefined) user.fullName = dto.fullName;
@@ -98,14 +98,14 @@ export class UsersService {
     return { ok: true };
   }
 
-  private assertSingleLink(dto: { customerId?: string; vendorId?: string }) {
-    if (dto.customerId && dto.vendorId) throw new BadRequestException('A user can be linked to a customer or a vendor, not both');
+  private assertSingleLink(dto: { clientId?: string; vendorId?: string }) {
+    if (dto.clientId && dto.vendorId) throw new BadRequestException('A user can be linked to a client or a vendor, not both');
   }
 
-  private async assertLinkBelongsToCompany(companyId: string, dto: { customerId?: string; vendorId?: string }) {
-    if (dto.customerId) {
-      const c = await this.customers.findOne({ where: { id: dto.customerId, companyId } });
-      if (!c) throw new NotFoundException('Customer not found');
+  private async assertLinkBelongsToCompany(companyId: string, dto: { clientId?: string; vendorId?: string }) {
+    if (dto.clientId) {
+      const c = await this.clients.findOne({ where: { id: dto.clientId, companyId } });
+      if (!c) throw new NotFoundException('Client not found');
     }
     if (dto.vendorId) {
       const v = await this.vendors.findOne({ where: { id: dto.vendorId, companyId } });
@@ -127,7 +127,7 @@ export class UsersService {
       phone: u.phone,
       branchId: u.branchId,
       kind: userKind(u),
-      customerId: u.customerId ?? undefined,
+      clientId: u.clientId ?? undefined,
       vendorId: u.vendorId ?? undefined,
       isActive: u.isActive,
       roles: (u.roles ?? []).map((r) => ({ id: r.id, name: r.name })),

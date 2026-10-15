@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 export type AccountType = 'asset' | 'liability' | 'equity' | 'income' | 'expense';
-export type PartyType = 'customer' | 'vendor' | 'employee';
+export type PartyType = 'client' | 'vendor' | 'employee';
 export type JournalStatus = 'draft' | 'posted' | 'reversed';
 
 @Entity('accounts')

@@ -18,7 +18,7 @@ const base = (props: P) => ({
 export const Icons = {
   home: (p: P) => <svg {...base(p)}><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v10h14V10" /></svg>,
   leads: (p: P) => <svg {...base(p)}><path d="M4 5h16l-6 7v6l-4 2v-8z" /></svg>,
-  customers: (p: P) => <svg {...base(p)}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4a3.5 3.5 0 0 1 0 7M18 13.5a6.5 6.5 0 0 1 3.5 6.5" /></svg>,
+  clients: (p: P) => <svg {...base(p)}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4a3.5 3.5 0 0 1 0 7M18 13.5a6.5 6.5 0 0 1 3.5 6.5" /></svg>,
   quotations: (p: P) => <svg {...base(p)}><path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5M10 13h6M10 17h6" /></svg>,
   projects: (p: P) => <svg {...base(p)}><path d="M3 21h18M5 21V8l7-4 7 4v13" /><path d="M9 21v-5h6v5M9 11h2M13 11h2" /></svg>,
   drawings: (p: P) => <svg {...base(p)}><path d="M4 4h16v16H4z" /><path d="M4 10h16M10 4v16" /></svg>,

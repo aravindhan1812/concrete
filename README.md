@@ -65,7 +65,7 @@ The full scope and phased plan live in [`docs/SCOPE.md`](docs/SCOPE.md). The sum
 
 ### Original roadmap (Phases 1–4)
 
-1. **Core loop**: customers, quotations → BOQ → project conversion, tasks/milestones.
+1. **Core loop**: clients, quotations → BOQ → project conversion, tasks/milestones.
 2. **Site + procurement**: daily reports, attendance, MR → RFQ → PO → GRN → stock.
 3. **Finance**: expenses, client invoicing (GST/TDS/retention), payments, costing dashboard.
 4. **AI + mobile**: BOQ from drawings, delay prediction, NL queries, React Native app.

@@ -29,25 +29,25 @@ describe('AudienceGuard', () => {
     expect(guardFor(c).canActivate(c)).toBe(true);
   });
 
-  it('blocks customer and vendor logins from undeclared (internal) routes', () => {
-    for (const kind of ['customer', 'vendor'] as UserKind[]) {
+  it('blocks client and vendor logins from undeclared (internal) routes', () => {
+    for (const kind of ['client', 'vendor'] as UserKind[]) {
       const c = ctx({ kind });
       expect(() => guardFor(c).canActivate(c)).toThrow(ForbiddenException);
     }
   });
 
   it('serves the declared audience and nobody else', () => {
-    const ok = ctx({ kind: 'customer' }, ['customer']);
+    const ok = ctx({ kind: 'client' }, ['client']);
     expect(guardFor(ok).canActivate(ok)).toBe(true);
-    const vendor = ctx({ kind: 'vendor' }, ['customer']);
+    const vendor = ctx({ kind: 'vendor' }, ['client']);
     expect(() => guardFor(vendor).canActivate(vendor)).toThrow(ForbiddenException);
-    const staff = ctx({ kind: 'staff' }, ['customer']);
+    const staff = ctx({ kind: 'staff' }, ['client']);
     expect(() => guardFor(staff).canActivate(staff)).toThrow(ForbiddenException);
   });
 
   it('AnyAudience-style routes serve everyone', () => {
-    for (const kind of ['staff', 'customer', 'vendor'] as UserKind[]) {
-      const c = ctx({ kind }, ['staff', 'customer', 'vendor']);
+    for (const kind of ['staff', 'client', 'vendor'] as UserKind[]) {
+      const c = ctx({ kind }, ['staff', 'client', 'vendor']);
       expect(guardFor(c).canActivate(c)).toBe(true);
     }
   });

@@ -92,29 +92,29 @@ export async function migrate(databaseUrl: string, mode: 'apply' | 'status' = 'a
       if (hasBaseline.rowCount) {
         if (mode === 'apply') {
           await db.query('INSERT INTO schema_migrations (version, name) VALUES ($1, $2)', [BASELINE, 'baseline (pre-existing)']);
-          log('0000  baseline        already present, recorded');
-        } else log('0000  baseline        present (unrecorded)');
+          log('0000  baseline                    already present, recorded');
+        } else log('0000  baseline                    present (unrecorded)');
       } else if (mode === 'apply') {
         const sql = readFileSync(join(dir, 'schema.sql'), 'utf8') + '\n' + readFileSync(join(dir, 'seed.sql'), 'utf8');
         await runFile(db, BASELINE, 'baseline', sql);
-        log('0000  baseline        applied (schema.sql + seed.sql)');
-      } else log('0000  baseline        pending');
+        log('0000  baseline                    applied (schema.sql + seed.sql)');
+      } else log('0000  baseline                    pending');
       done.add(BASELINE);
-    } else if (mode === 'status') log('0000  baseline        applied');
+    } else if (mode === 'status') log('0000  baseline                    applied');
 
     let pending = 0;
     for (const m of listMigrations(dir)) {
       if (done.has(m.version)) {
-        if (mode === 'status') log(`${m.version}  ${m.name.padEnd(16)}applied`);
+        if (mode === 'status') log(`${m.version}  ${m.name.padEnd(28)}applied`);
         continue;
       }
       pending++;
       if (mode === 'status') {
-        log(`${m.version}  ${m.name.padEnd(16)}pending`);
+        log(`${m.version}  ${m.name.padEnd(28)}pending`);
         continue;
       }
       await runFile(db, m.version, m.name, readFileSync(m.path, 'utf8'));
-      log(`${m.version}  ${m.name.padEnd(16)}applied`);
+      log(`${m.version}  ${m.name.padEnd(28)}applied`);
     }
     if (mode === 'apply' && pending === 0) log('No pending migrations.');
     return pending;

@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('customers')
-export class Customer {
+@Entity('clients')
+export class Client {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'company_id' }) companyId: string;
   @Column() name: string;

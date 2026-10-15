@@ -51,7 +51,7 @@ Concrete is a multi-tenant SaaS ERP for construction and interior contractors. O
 
 1. **Tenancy & identity** — companies, branches, warehouses, users, roles, permissions, refresh tokens.
 2. **Shared infra** — files (polymorphic attachments with GPS for site photos), audit logs, notifications, generic approval engine (`approval_requests` + ordered `approval_steps`) reused by POs, quotations, expenses, leave.
-3. **CRM** — customers, contacts, **leads with an enforced pipeline state machine** (`new → contacted → site_visit → quotation → negotiation → won/lost`), follow-ups, meetings, notes.
+3. **CRM** — clients, contacts, **leads with an enforced pipeline state machine** (`new → contacted → site_visit → quotation → negotiation → won/lost`), follow-ups, meetings, notes.
 4. **Sales** — quotations (version chain via `parent_id`), BOQs (hierarchical `boq_items` with wastage %, `source = manual | ai_drawing`).
 5. **Projects** — projects, members, milestones (with `billing_pct` for progress invoicing), WBS, tasks + dependencies (FS/SS/FF/SF), risks.
 6. **Site** — daily reports (unique per project/day, AI-generatable), GPS attendance for employees *and* labour, visitors, issues/delays/safety/quality, inspections with JSONB checklists.
@@ -70,7 +70,7 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 - `POST /resource` create · `GET /resource` list · `GET /resource/:id` detail · `PATCH /resource/:id` update · `DELETE /resource/:id` soft delete.
 - State changes are explicit sub-resources, not generic updates: `PATCH /crm/leads/:id/status`, `POST /procurement/pos/:id/approve`. This is what lets the server enforce workflow rules.
 - Every route declares required permission codes; the guard passes if the user holds **any** of them.
-- Every route has an **audience**. Routes without `@Audience(...)` serve staff only; portal routes opt in with `@Audience('customer')` / `@Audience('vendor')` and scope their queries by `user.customerId` / `user.vendorId`. A customer or vendor login therefore cannot reach an internal endpoint even if a misconfigured role granted it the permission.
+- Every route has an **audience**. Routes without `@Audience(...)` serve staff only; portal routes opt in with `@Audience('client')` / `@Audience('vendor')` and scope their queries by `user.clientId` / `user.vendorId`. A client or vendor login therefore cannot reach an internal endpoint even if a misconfigured role granted it the permission.
 
 ### Implemented in this scaffold
 
@@ -83,9 +83,9 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `GET /rbac/permissions` | `admin.roles.manage` | Full permission catalog |
 | `GET/POST /rbac/roles` | `admin.roles.manage` | Company's roles |
 | `PUT /rbac/roles/:id/permissions` | `admin.roles.manage` | Replace a role's permission set |
-| `GET /admin/users` | `admin.users.manage` | Filter: `kind` (staff/customer/vendor), `search`; paginated |
+| `GET /admin/users` | `admin.users.manage` | Filter: `kind` (staff/client/vendor), `search`; paginated |
 | `GET /admin/users/:id` | `admin.users.manage` | |
-| `POST /admin/users` | `admin.users.manage` | Staff login, or portal login with exactly one of `customerId` / `vendorId` (must belong to the company) |
+| `POST /admin/users` | `admin.users.manage` | Staff login, or portal login with exactly one of `clientId` / `vendorId` (must belong to the company) |
 | `PATCH /admin/users/:id` | `admin.users.manage` | Name, roles, password, active flag; the external link is immutable |
 | `DELETE /admin/users/:id` | `admin.users.manage` | Deactivates (never your own account) |
 | `POST /accounting/setup` | `finance.ledger.manage` | Idempotent: default chart of accounts, voucher types, current FY (also runs at company registration) |
@@ -115,7 +115,7 @@ The remaining modules follow the same pattern; their resource names map 1:1 to t
 
 - Passwords: bcrypt (cost 10). Refresh tokens: 48 random bytes, only the SHA-256 hash is stored.
 - Tenant isolation is enforced in **every service method signature** — `findOne(companyId, id)` — so forgetting it is a compile-visible smell, not a silent leak.
-- External users: `users.customer_id` / `users.vendor_id` (mutually exclusive, DB CHECK). The JWT carries `kind` and the linked id; `AudienceGuard` is the single enforcement point that keeps portal logins off internal routes.
+- External users: `users.client_id` / `users.vendor_id` (mutually exclusive, DB CHECK). The JWT carries `kind` and the linked id; `AudienceGuard` is the single enforcement point that keeps portal logins off internal routes.
 - `ValidationPipe({ whitelist: true })` strips unknown fields; DTOs whitelist enums for sources/segments/statuses.
 - Global audit interceptor records who did what to which entity, scrubbing password/token fields.
 - Secrets via environment only; `.env.example` documents the contract.
