@@ -11,6 +11,9 @@ export class User {
   @Column({ name: 'company_id' }) companyId: string;
   @ManyToOne(() => Company) @JoinColumn({ name: 'company_id' }) company: Company;
   @Column({ name: 'branch_id', nullable: true }) branchId?: string;
+  /** External logins: exactly one of these is set (DB CHECK enforces mutual exclusion). */
+  @Column({ name: 'customer_id', nullable: true }) customerId?: string;
+  @Column({ name: 'vendor_id', nullable: true }) vendorId?: string;
   @Column({ type: 'citext', nullable: true }) email?: string;
   @Column({ nullable: true }) phone?: string;
   @Column({ name: 'password_hash' }) passwordHash: string;

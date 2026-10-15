@@ -42,7 +42,7 @@ Role templates are cloned into each company at signup and can be edited freely (
 | **Client** (external) | Client portal — own projects only | **Phone** |
 | **Vendor / Subcontractor** (external) | Vendor portal — own POs, work orders, bills | **Phone** |
 
-**External users.** A user record links to *either* a customer or a vendor (`users.customer_id` / `users.vendor_id`, mutually exclusive, both null for staff). The server scopes every query for an external user to that customer or vendor automatically — this is enforced in one place, not per endpoint. ❌ *Not designed yet: the `users` table has no such link today, so the existing Client and Vendor templates cannot work.*
+**External users.** A user record links to *either* a customer or a vendor (`users.customer_id` / `users.vendor_id`, mutually exclusive, both null for staff). Every route declares an audience; routes without one serve staff only, so a portal login can never reach an internal endpoint, and portal routes scope their queries by the linked id. ✅ *Built: migration `0001_external_users`, `AudienceGuard`, `kind` in the JWT, `portal.client` / `portal.vendor` permissions on the Client and Vendor templates, and `/admin/users` to create and manage logins.*
 
 ---
 
@@ -361,12 +361,12 @@ Ordered by dependency first and business value second; each item builds on the o
 
 | # | Item | Why first |
 |---|---|---|
-| 1 | Responsive app shell: bottom navigation on phones, collapsible sidebar on tablets, full sidebar on desktop; installable PWA | Phones currently have no navigation; every later screen sits inside this |
-| 2 | Component library: inputs, tables that become cards, filters, status pills, KPI tiles, file/photo capture, light/dark | Consistency; avoids re-styling every module |
-| 3 | Routing and permission-aware navigation | Menus and pages appear only if the role allows |
-| 4 | CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
+| 1 | ✅ Responsive app shell: bottom navigation on phones, collapsible sidebar on tablets, full sidebar on desktop; installable PWA | Phones currently have no navigation; every later screen sits inside this |
+| 2 | ✅ Component library: inputs, tables that become cards, filters, status pills, KPI tiles, light/dark (photo capture pending) | Consistency; avoids re-styling every module |
+| 3 | ✅ Routing and permission-aware navigation | Menus and pages appear only if the role allows |
+| 4 | ✅ CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
 | 5 | Shared backend services: numbering series, approval engine with amount thresholds, file storage, comments, notifications | Used by every document type |
-| 6 | External users: `users.customer_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
+| 6 | ✅ External users: `users.customer_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
 | 7 | Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
 | 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
 

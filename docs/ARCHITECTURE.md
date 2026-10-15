@@ -11,7 +11,7 @@ Concrete is a multi-tenant SaaS ERP for construction and interior contractors. O
        │  HTTPS / REST (JWT bearer) │
 ┌──────┴────────────────────┴──────┐
 │      NestJS API  (api/v1)        │
-│  Guards: JWT → Permissions       │
+│  Guards: JWT → Audience → Perms  │
 │  Interceptor: Audit              │
 │  Modules: Auth · RBAC · CRM ·    │
 │  Sales · Projects · Site · MRP · │
@@ -68,6 +68,7 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 - `POST /resource` create · `GET /resource` list · `GET /resource/:id` detail · `PATCH /resource/:id` update · `DELETE /resource/:id` soft delete.
 - State changes are explicit sub-resources, not generic updates: `PATCH /crm/leads/:id/status`, `POST /procurement/pos/:id/approve`. This is what lets the server enforce workflow rules.
 - Every route declares required permission codes; the guard passes if the user holds **any** of them.
+- Every route has an **audience**. Routes without `@Audience(...)` serve staff only; portal routes opt in with `@Audience('customer')` / `@Audience('vendor')` and scope their queries by `user.customerId` / `user.vendorId`. A customer or vendor login therefore cannot reach an internal endpoint even if a misconfigured role granted it the permission.
 
 ### Implemented in this scaffold
 
@@ -80,6 +81,11 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `GET /rbac/permissions` | `admin.roles.manage` | Full permission catalog |
 | `GET/POST /rbac/roles` | `admin.roles.manage` | Company's roles |
 | `PUT /rbac/roles/:id/permissions` | `admin.roles.manage` | Replace a role's permission set |
+| `GET /admin/users` | `admin.users.manage` | Filter: `kind` (staff/customer/vendor), `search`; paginated |
+| `GET /admin/users/:id` | `admin.users.manage` | |
+| `POST /admin/users` | `admin.users.manage` | Staff login, or portal login with exactly one of `customerId` / `vendorId` (must belong to the company) |
+| `PATCH /admin/users/:id` | `admin.users.manage` | Name, roles, password, active flag; the external link is immutable |
+| `DELETE /admin/users/:id` | `admin.users.manage` | Deactivates (never your own account) |
 | `GET /crm/leads` | `crm.leads.read` | Filter: `status`, `search` (title/contact/phone), paginated |
 | `GET /crm/leads/stats` | `crm.leads.read` or `reports.read` | Count + pipeline value by status |
 | `GET /crm/leads/:id` | `crm.leads.read` | Includes follow-ups |
@@ -95,6 +101,7 @@ The remaining modules follow the same pattern; their resource names map 1:1 to t
 
 - Passwords: bcrypt (cost 10). Refresh tokens: 48 random bytes, only the SHA-256 hash is stored.
 - Tenant isolation is enforced in **every service method signature** — `findOne(companyId, id)` — so forgetting it is a compile-visible smell, not a silent leak.
+- External users: `users.customer_id` / `users.vendor_id` (mutually exclusive, DB CHECK). The JWT carries `kind` and the linked id; `AudienceGuard` is the single enforcement point that keeps portal logins off internal routes.
 - `ValidationPipe({ whitelist: true })` strips unknown fields; DTOs whitelist enums for sources/segments/statuses.
 - Global audit interceptor records who did what to which entity, scrubbing password/token fields.
 - Secrets via environment only; `.env.example` documents the contract.

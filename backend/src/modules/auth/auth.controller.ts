@@ -1,11 +1,13 @@
 import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
+import { AnyAudience } from '../../common/decorators/audience.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto, RefreshDto } from './dto/login.dto';
 import { RegisterCompanyDto } from './dto/register-company.dto';
 
 @Controller('auth')
+@AnyAudience() // login / refresh / logout serve staff and portal users alike
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 

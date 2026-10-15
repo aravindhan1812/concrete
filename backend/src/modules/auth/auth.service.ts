@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { DataSource, IsNull, MoreThan, Repository } from 'typeorm';
+import { userKind } from '../../common/types';
 import { AuditService } from '../audit/audit.service';
 import { Company } from '../../entities/company.entity';
 import { RefreshToken } from '../../entities/refresh-token.entity';
@@ -119,6 +120,9 @@ export class AuthService {
         fullName: user.fullName,
         roles: (user.roles ?? []).map((r) => r.name),
         permissions,
+        kind: userKind(user),
+        customerId: user.customerId ?? undefined,
+        vendorId: user.vendorId ?? undefined,
       },
       {
         secret: this.config.get<string>('JWT_ACCESS_SECRET', 'dev-access-secret'),
@@ -154,6 +158,9 @@ export class AuthService {
       fullName: user.fullName,
       roles: (user.roles ?? []).map((r) => r.name),
       permissions: this.collectPermissions(user),
+      kind: userKind(user),
+      customerId: user.customerId ?? undefined,
+      vendorId: user.vendorId ?? undefined,
     };
   }
 

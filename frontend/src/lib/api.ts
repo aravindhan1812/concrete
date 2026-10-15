@@ -9,6 +9,10 @@ export interface SessionUser {
   fullName: string;
   roles: string[];
   permissions: string[];
+  /** staff = company user; customer / vendor = portal login scoped to that record. */
+  kind?: 'staff' | 'customer' | 'vendor';
+  customerId?: string;
+  vendorId?: string;
 }
 
 interface StoredSession {

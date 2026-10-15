@@ -64,6 +64,14 @@ describe('AuthService', () => {
       expect.arrayContaining(['crm.leads.read', 'admin.roles.manage']),
     );
     expect(refreshTokens.insert).toHaveBeenCalled(); // hashed refresh token persisted
+    expect(result.user.kind).toBe('staff');
+  });
+
+  it('login marks a vendor-linked user as kind=vendor and carries the vendorId', async () => {
+    users.findOne.mockResolvedValue({ ...(await activeUser()), vendorId: 'ven-1' });
+    const result = await service.login({ email: 'owner@acme.in', password: 'secret123' });
+    expect(result.user.kind).toBe('vendor');
+    expect(result.user.vendorId).toBe('ven-1');
   });
 
   it('login rejects a wrong password without revealing which field failed', async () => {
