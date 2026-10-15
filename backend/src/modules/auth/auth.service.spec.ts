@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
+import { LedgerSetupService } from '../accounting/ledger-setup.service';
 import { AuditService } from '../audit/audit.service';
 import { Company } from '../../entities/company.entity';
 import { RefreshToken } from '../../entities/refresh-token.entity';
@@ -47,6 +48,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: { signAsync: jest.fn(async () => 'signed.jwt') } },
         { provide: ConfigService, useValue: { get: jest.fn((_k: string, d?: unknown) => d) } },
         { provide: AuditService, useValue: { log: jest.fn() } },
+        { provide: LedgerSetupService, useValue: { bootstrap: jest.fn() } },
         { provide: DataSource, useValue: { transaction: jest.fn() } },
       ],
     }).compile();

@@ -44,6 +44,8 @@ Concrete is a multi-tenant SaaS ERP for construction and interior contractors. O
 | Audit | Global interceptor writes every successful mutation | Compliance and dispute resolution for financial documents |
 | AI features | Async `ai_jobs` queue with `input/output` JSONB | LLM/vision calls are slow and fallible; never block a user request on them |
 | Deletes | Soft (`deleted_at`) on business entities | ERP data is legal/financial history |
+| Ledger | Double-entry; balance, period locks and immutability enforced by Postgres triggers as well as the service | A bug in any module cannot leave the books unbalanced or rewrite history |
+| Posting rules | `accounts.system_key` maps each rule target (`ar_control`, `output_gst`, …) to one ledger per company | Companies rename / restructure their chart without touching code |
 
 ## 3. Domain map (schema sections → modules)
 
@@ -86,6 +88,18 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `POST /admin/users` | `admin.users.manage` | Staff login, or portal login with exactly one of `customerId` / `vendorId` (must belong to the company) |
 | `PATCH /admin/users/:id` | `admin.users.manage` | Name, roles, password, active flag; the external link is immutable |
 | `DELETE /admin/users/:id` | `admin.users.manage` | Deactivates (never your own account) |
+| `POST /accounting/setup` | `finance.ledger.manage` | Idempotent: default chart of accounts, voucher types, current FY (also runs at company registration) |
+| `GET /accounting/accounts` | `finance.ledger.read` | Flat chart ordered by code; `withBalances=true` adds rolled-up balances |
+| `POST /accounting/accounts` · `PATCH /accounting/accounts/:id` | `finance.ledger.manage` | Add / rename / re-parent / deactivate; `systemKey` re-points a posting rule |
+| `GET /accounting/voucher-types` | `finance.ledger.read` | SAL, PUR, RCT, PAY, CON, JV, DN, CN |
+| `GET /accounting/financial-years` · `POST` | `finance.ledger.read` / `.manage` | Years with their monthly periods |
+| `POST /accounting/periods/:id/lock` · `/unlock` | `finance.ledger.manage` | Nothing posts into a locked period |
+| `POST /accounting/financial-years/:id/close` | `finance.ledger.manage` | Locks every period, marks the year closed |
+| `GET /accounting/journals` | `finance.ledger.read` | Filters: `voucherType`, `status`, `from`, `to`, `accountId`, `projectId` |
+| `POST /accounting/journals` | `finance.ledger.post` | Lines by `accountId` or `systemKey`; validated, numbered `PREFIX/FY/0001`, posted atomically |
+| `POST /accounting/journals/:id/reverse` | `finance.ledger.post` | Mirror-image entry linked both ways; the original becomes `reversed` |
+| `GET /accounting/reports/trial-balance` | `finance.ledger.read` | `from`/`to`; opening carried from before `from` |
+| `GET /accounting/reports/ledger/:accountId` | `finance.ledger.read` | Account statement with running balance |
 | `GET /crm/leads` | `crm.leads.read` | Filter: `status`, `search` (title/contact/phone), paginated |
 | `GET /crm/leads/stats` | `crm.leads.read` or `reports.read` | Count + pipeline value by status |
 | `GET /crm/leads/:id` | `crm.leads.read` | Includes follow-ups |

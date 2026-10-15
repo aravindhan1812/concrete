@@ -247,7 +247,7 @@ Concrete is the **system of record for the books**. Every financial document pos
 
 **Integration**: export to Tally (XML) for companies whose auditors insist; API for other tools. Concrete remains the master.
 
-**Status / gaps:** 🟡 cost codes, budgets, expenses, client invoices, payments, bank accounts and transactions, TDS register, `v_project_costing` view. ❌ chart of accounts, journal entries and lines, voucher types, financial years and period locks, posting rules, party sub-ledgers and bill-wise settlement, GST returns, retention/advance accounting, WIP recognition, financial reports. `v_project_costing` will be rebuilt on top of the ledger.
+**Status / gaps:** ✅ ledger core (migration `0002_ledger`): chart of accounts with the Indian contractor template and per-company system-key mapping, balanced journals enforced by DB triggers, voucher types and per-FY numbering, financial years with monthly period locks, immutable posted entries with linked reversals, party-tagged lines with `ref_type/ref_id` for bill-wise settlement, trial balance and account ledger reports, `/accounting` API. 🟡 cost codes, budgets, expenses, client invoices, payments, bank accounts and transactions, TDS register, `v_project_costing` view. ❌ posting rules wired into documents (invoices, GRNs, payroll…), bill-wise ageing, GST returns, retention/advance accounting, WIP recognition, P&L / balance sheet / cash flow, year-end close-out entry. `v_project_costing` will be rebuilt on top of the ledger.
 
 ### 5.15 Client portal
 
@@ -367,7 +367,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 4 | ✅ CI (lint, type-check, tests, build) and database migrations | Safe, additive schema changes from here on |
 | 5 | Shared backend services: numbering series, approval engine with amount thresholds, file storage, comments, notifications | Used by every document type |
 | 6 | ✅ External users: `users.customer_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
-| 7 | Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
+| 7 | ✅ Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
 | 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
 
 ### P1 — Core business flow (enquiry → first invoice)

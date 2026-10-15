@@ -7,6 +7,7 @@ import { AudienceGuard } from './common/guards/audience.guard';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { AccountingModule } from './modules/accounting/accounting.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LeadsModule } from './modules/leads/leads.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './modules/users/users.module';
       }),
     }),
     AuditModule,
+    AccountingModule,
     AuthModule,
     RbacModule,
     UsersModule,

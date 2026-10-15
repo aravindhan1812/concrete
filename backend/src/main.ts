@@ -1,7 +1,11 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { types } from 'pg';
 import 'reflect-metadata';
 import { AppModule } from './app.module';
+
+// Keep SQL DATE values as plain 'YYYY-MM-DD' strings (no timezone shifting).
+types.setTypeParser(types.builtins.DATE, (v: string) => v);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

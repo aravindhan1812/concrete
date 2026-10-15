@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { DataSource, IsNull, MoreThan, Repository } from 'typeorm';
 import { userKind } from '../../common/types';
+import { LedgerSetupService } from '../accounting/ledger-setup.service';
 import { AuditService } from '../audit/audit.service';
 import { Company } from '../../entities/company.entity';
 import { RefreshToken } from '../../entities/refresh-token.entity';
@@ -30,6 +31,7 @@ export class AuthService {
     private readonly config: ConfigService,
     private readonly audit: AuditService,
     private readonly dataSource: DataSource,
+    private readonly ledgerSetup: LedgerSetupService,
   ) {}
 
   /** Tenant bootstrap: creates the company, clones system role templates, creates the owner. */
@@ -56,6 +58,9 @@ export class AuthService {
 
       const existing = await em.findOne(User, { where: { email: dto.email } });
       if (existing) throw new ConflictException('An account with this email already exists');
+
+      // Books are opened with the company: default chart of accounts, voucher types, current FY.
+      await this.ledgerSetup.bootstrap(company.id, new Date(), em);
 
       const owner = await em.save(
         em.create(User, {
