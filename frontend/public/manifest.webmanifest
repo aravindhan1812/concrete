@@ -1,0 +1,14 @@
+{
+  "name": "Concrete",
+  "short_name": "Concrete",
+  "description": "Construction & interior ERP",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f8fb",
+  "theme_color": "#2f4a8a",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

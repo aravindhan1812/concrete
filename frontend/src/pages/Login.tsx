@@ -1,11 +1,13 @@
 import { FormEvent, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Alert, Button, TextField } from '../components/ui';
 import { api, SessionUser, setSession } from '../lib/api';
+import { useSession } from '../lib/session';
 
-interface Props {
-  onLogin: (user: SessionUser) => void;
-}
-
-export default function Login({ onLogin }: Props) {
+export default function Login() {
+  const { signIn } = useSession();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,12 +24,11 @@ export default function Login({ onLogin }: Props) {
       if (mode === 'register') {
         await api.post('/auth/register-company', { companyName, fullName, email, password });
       }
-      const result = await api.post<{ user: SessionUser; accessToken: string; refreshToken: string }>(
-        '/auth/login',
-        { email, password },
-      );
+      const result = await api.post<{ user: SessionUser; accessToken: string; refreshToken: string }>('/auth/login', { email, password });
       setSession(result);
-      onLogin(result.user);
+      signIn(result.user);
+      const from = (location.state as { from?: string } | null)?.from;
+      navigate(from && from !== '/login' ? from : '/', { replace: true });
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -38,44 +39,34 @@ export default function Login({ onLogin }: Props) {
   return (
     <div className="login-wrap">
       <form className="login-card" onSubmit={submit}>
-        <h1>
-          Concrete
-        </h1>
-        <p className="sub">
-          {mode === 'login' ? 'Sign in to your workspace' : 'Create your company workspace'}
-        </p>
+        <div className="brand login-brand">
+          <span className="brand-mark">C</span>
+          <span className="brand-text">Concrete</span>
+        </div>
+        <p className="sub">{mode === 'login' ? 'Sign in to your workspace' : 'Create your company workspace'}</p>
         {mode === 'register' && (
           <>
-            <div className="field">
-              <label htmlFor="company">Company name</label>
-              <input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
-            </div>
-            <div className="field">
-              <label htmlFor="name">Your name</label>
-              <input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-            </div>
+            <TextField label="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required autoComplete="organization" />
+            <TextField label="Your name" value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
           </>
         )}
-        <div className="field">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        {error && <div className="error">{error}</div>}
-        <button className="btn" style={{ width: '100%' }} disabled={busy}>
-          {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create workspace'}
-        </button>
-        <button
-          type="button"
-          className="btn ghost"
-          style={{ width: '100%', marginTop: 8 }}
-          onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-        >
+        <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" inputMode="email" />
+        <TextField
+          label="Password"
+          type="password"
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+        />
+        {error && <Alert>{error}</Alert>}
+        <Button type="submit" loading={busy} style={{ width: '100%' }}>
+          {mode === 'login' ? 'Sign in' : 'Create workspace'}
+        </Button>
+        <Button type="button" variant="ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
           {mode === 'login' ? 'New company? Register' : 'Have an account? Sign in'}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -1,69 +1,62 @@
-import { useEffect, useState } from 'react';
-import { clearSession, hasSession, SessionUser } from './lib/api';
+import { ReactNode } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { NAV } from './app/nav';
+import Shell from './app/Shell';
+import { SessionProvider, useSession } from './lib/session';
+import ComingSoon, { Forbidden, NotFound } from './pages/ComingSoon';
+import Dashboard from './pages/Dashboard';
 import Leads from './pages/Leads';
 import Login from './pages/Login';
 
-const NAV = [
-  { key: 'leads', label: 'Leads', ready: true },
-  { key: 'quotations', label: 'Quotations', ready: false },
-  { key: 'projects', label: 'Projects', ready: false },
-  { key: 'site', label: 'Site', ready: false },
-  { key: 'procurement', label: 'Procurement', ready: false },
-  { key: 'inventory', label: 'Inventory', ready: false },
-  { key: 'finance', label: 'Finance', ready: false },
-];
+/** Renders children only if the user holds one of the permissions; otherwise a friendly 403. */
+function Guard({ permissions, children }: { permissions: string[]; children: ReactNode }) {
+  const { can } = useSession();
+  return can(...permissions) ? <>{children}</> : <Forbidden />;
+}
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user } = useSession();
+  const location = useLocation();
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  return <>{children}</>;
+}
+
+const PAGES: Record<string, ReactNode> = {
+  home: <Dashboard />,
+  leads: <Leads />,
+};
+
+function AppRoutes() {
+  const { user } = useSession();
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route
+        element={
+          <RequireAuth>
+            <Shell />
+          </RequireAuth>
+        }
+      >
+        {NAV.map((item) => (
+          <Route
+            key={item.key}
+            path={item.path === '/' ? '/' : `${item.path}/*`}
+            element={<Guard permissions={item.permissions}>{item.ready ? PAGES[item.key] : <ComingSoon />}</Guard>}
+          />
+        ))}
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  );
+}
 
 export default function App() {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [page, setPage] = useState('leads');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  if (!user || !hasSession()) {
-    return <Login onLogin={setUser} />;
-  }
-
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <div className="brand">
-          Concrete
-        </div>
-        {NAV.map((item) => (
-          <a
-            key={item.key}
-            href="#"
-            className={`nav-item${page === item.key ? ' active' : ''}`}
-            style={item.ready ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
-            onClick={(e) => {
-              e.preventDefault();
-              if (item.ready) setPage(item.key);
-            }}
-          >
-            {item.label}
-            {!item.ready && ' · soon'}
-          </a>
-        ))}
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button className="btn secondary" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-            {theme === 'light' ? 'Dark mode' : 'Light mode'}
-          </button>
-          <div style={{ fontSize: 12, color: 'var(--muted)', padding: '0 4px' }}>{user.fullName}</div>
-          <button
-            className="btn ghost"
-            onClick={() => {
-              clearSession();
-              setUser(null);
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      </aside>
-      <main className="main">{page === 'leads' && <Leads />}</main>
-    </div>
+    <SessionProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </SessionProvider>
   );
 }
