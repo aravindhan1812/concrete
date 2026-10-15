@@ -69,6 +69,20 @@ describe('AuthService', () => {
     expect(result.user.kind).toBe('staff');
   });
 
+  it('login reports the broadest data scope across the user\'s roles', async () => {
+    const u = await activeUser();
+    users.findOne.mockResolvedValue({
+      ...u,
+      roles: [
+        { name: 'Site Engineer', dataScope: 'assigned_projects', permissions: [] },
+        { name: 'Store Manager', dataScope: 'company', permissions: [] },
+      ],
+    });
+    expect((await service.login({ email: 'owner@acme.in', password: 'secret123' })).user.dataScope).toBe('company');
+    users.findOne.mockResolvedValue({ ...u, roles: [{ name: 'Site Engineer', dataScope: 'assigned_projects', permissions: [] }] });
+    expect((await service.login({ email: 'owner@acme.in', password: 'secret123' })).user.dataScope).toBe('assigned_projects');
+  });
+
   it('login marks a vendor-linked user as kind=vendor and carries the vendorId', async () => {
     users.findOne.mockResolvedValue({ ...(await activeUser()), vendorId: 'ven-1' });
     const result = await service.login({ email: 'owner@acme.in', password: 'secret123' });

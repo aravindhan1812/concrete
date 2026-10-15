@@ -11,6 +11,8 @@ export interface SessionUser {
   permissions: string[];
   /** staff = company user; client / vendor = portal login scoped to that record. */
   kind?: 'staff' | 'client' | 'vendor';
+  /** company = everything; assigned_projects = only their projects; own_records = portal. */
+  dataScope?: 'company' | 'assigned_projects' | 'own_records';
   clientId?: string;
   vendorId?: string;
 }

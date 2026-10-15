@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { DataSource, IsNull, MoreThan, Repository } from 'typeorm';
-import { userKind } from '../../common/types';
+import { broadestScope, userKind } from '../../common/types';
 import { LedgerSetupService } from '../accounting/ledger-setup.service';
 import { AuditService } from '../audit/audit.service';
 import { Company } from '../../entities/company.entity';
@@ -50,6 +50,7 @@ export class AuthService {
             name: t.name,
             description: t.description,
             isSystem: false,
+            dataScope: t.dataScope,
             permissions: t.permissions,
           }),
         ),
@@ -126,6 +127,7 @@ export class AuthService {
         roles: (user.roles ?? []).map((r) => r.name),
         permissions,
         kind: userKind(user),
+        dataScope: this.dataScope(user),
         clientId: user.clientId ?? undefined,
         vendorId: user.vendorId ?? undefined,
       },
@@ -164,9 +166,15 @@ export class AuthService {
       roles: (user.roles ?? []).map((r) => r.name),
       permissions: this.collectPermissions(user),
       kind: userKind(user),
+      dataScope: this.dataScope(user),
       clientId: user.clientId ?? undefined,
       vendorId: user.vendorId ?? undefined,
     };
+  }
+
+  private dataScope(user: User) {
+    const roles = user.roles ?? [];
+    return roles.length ? broadestScope(roles.map((r) => r.dataScope ?? 'company')) : 'own_records';
   }
 
   private hash(value: string): string {

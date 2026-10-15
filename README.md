@@ -7,6 +7,7 @@ AI-powered Construction & Interior Project Management SaaS — Phase 0 foundatio
 | Piece | Where | Status |
 |---|---|---|
 | **Product scope, gaps and delivery plan** | `docs/SCOPE.md` | ✅ |
+| **Roles & responsibilities** (who does what, data scope, approvals, labour) | `docs/ROLES.md` | ✅ |
 | Architecture & API design | `docs/ARCHITECTURE.md` | ✅ |
 | Complete database schema (82 tables, all 13 modules) | `database/schema.sql` | ✅ |
 | Permission catalog + 11 role templates | `database/seed.sql` | ✅ |

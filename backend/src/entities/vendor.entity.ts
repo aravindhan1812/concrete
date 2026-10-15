@@ -11,6 +11,7 @@ export class Vendor {
   @Column({ nullable: true }) email?: string;
   @Column({ nullable: true }) phone?: string;
   @Column({ type: 'jsonb', nullable: true }) address?: Record<string, unknown>;
+  @Column({ name: 'vendor_type', default: 'supplier' }) vendorType: 'supplier' | 'subcontractor' | 'labour_contractor' | 'equipment_hire' | 'service_provider';
   @Column({ type: 'text', array: true, nullable: true }) categories?: string[];
   @Column({ name: 'payment_terms', nullable: true }) paymentTerms?: string;
   @Column({ name: 'credit_days', type: 'int', nullable: true }) creditDays?: number;

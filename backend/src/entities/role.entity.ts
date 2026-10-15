@@ -8,6 +8,7 @@ export class Role {
   @Column() name: string;
   @Column({ nullable: true }) description?: string;
   @Column({ name: 'is_system', default: false }) isSystem: boolean;
+  @Column({ name: 'data_scope', default: 'company' }) dataScope: 'company' | 'assigned_projects' | 'own_records';
   @ManyToMany(() => Permission, { eager: true })
   @JoinTable({
     name: 'role_permissions',

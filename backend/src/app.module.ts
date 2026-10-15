@@ -4,6 +4,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { EntityAccessModule } from './common/entity-access/entity-access.service';
+import { ProjectScopeModule } from './common/project-scope/project-scope.service';
 import { AudienceGuard } from './common/guards/audience.guard';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     NotificationsModule,
     ApprovalsModule,
     EntityAccessModule,
+    ProjectScopeModule,
     FilesModule,
     CommentsModule,
     AccountingModule,

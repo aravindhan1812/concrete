@@ -23,24 +23,18 @@ Hard requirements:
 
 ## 2. Users and roles
 
-Role templates are cloned into each company at signup and can be edited freely (`admin.roles.manage`).
+Full detail — responsibilities, daily use, data scope, approval authority, who-does-what for each workflow, and how labour is handled — is in **[`ROLES.md`](ROLES.md)**. Summary:
 
-| Role | Primary job in Concrete | Main device |
+| Group | Roles (templates) | Sees |
 |---|---|---|
-| Company Owner | Everything; profitability, cash, risk | Desktop + phone |
-| Director | Read everything, approvals | Desktop + phone |
-| Project Manager | Plan and run projects, approve site requests | Desktop + tablet |
-| Site Engineer / Supervisor | Daily reports, attendance, material requests, QC/safety on site | **Phone** |
-| QC Engineer *(new template)* | Inspections, NCRs, material tests, snagging | Tablet + phone |
-| Safety Officer *(new template)* | Permits, incidents, toolbox talks, audits | Phone |
-| Purchase Manager | Vendor quotes, POs, vendor onboarding, rate lists | Desktop |
-| Store Manager | Goods receipts, issues, transfers, stock audits, tools | Tablet + phone |
-| Finance / Accountant | Accounting, invoicing, payments, GST/TDS, reports | Desktop |
-| HR | Employees, labour, leave, payroll | Desktop |
-| Sales Executive | Leads, clients, quotations | Phone + desktop |
-| Designer / Architect *(new template)* | Drawings, revisions, client selections | Desktop |
-| **Client** (external) | Client portal — own projects only | **Phone** |
-| **Vendor / Subcontractor** (external) | Vendor portal — own POs, work orders, bills | **Phone** |
+| Management | Company Owner, Director | Whole company |
+| Project delivery | Project Manager, Site Engineer, Site Supervisor / Foreman, Quantity Surveyor, QC Engineer, Safety Officer, Site Storekeeper, Designer | Only their assigned projects |
+| Supply chain | Purchase Manager, Store Manager | Whole company |
+| Back office | Finance, HR, Sales Executive | Whole company |
+| External (portals) | Client, Vendor (supplier), Subcontractor, Labour Contractor | Only their own records |
+| Labour | Daily-wage and contractor labourers | No login; records that supervisors, engineers, HR and finance act on (optional worker self-service in P4) |
+
+Templates are cloned into each company at signup and can be edited freely (`admin.roles.manage`), including each role's data scope.
 
 **External users.** A user record links to *either* a client or a vendor (`users.client_id` / `users.vendor_id`, mutually exclusive, both null for staff). Every route declares an audience; routes without one serve staff only, so a portal login can never reach an internal endpoint, and portal routes scope their queries by the linked id. ✅ *Built: migration `0001_external_users`, `AudienceGuard`, `kind` in the JWT, `portal.client` / `portal.vendor` permissions on the Client and Vendor templates, and `/admin/users` to create and manage logins.*
 
@@ -386,7 +380,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 9 | Clients and contacts; lead → client conversion; client credit limits and terms |
 | 10 | Item master, units, categories, cost codes |
 | 11 | Quotations with versions; BOQ with rate analysis |
-| 12 | Quotation → project conversion; milestones, WBS, tasks |
+| 12 | Quotation → project conversion; **project team assignment** (PM, site engineer, supervisor, QS, QC… per project — drives assigned-project access); milestones, WBS, tasks |
 | 13 | Gantt, baseline schedule, progress against BOQ quantities |
 | 14 | Drawings: register, revisions, transmittals, RFIs, in-browser viewer |
 | 15 | Change orders / variations updating BOQ, budget and schedule |
@@ -412,7 +406,7 @@ Ordered by dependency first and business value second; each item builds on the o
 
 | # | Item |
 |---|---|
-| 28 | Employees, labour, leave, overtime, advances |
+| 28 | Employees, labour register (skills, contractor, ID, induction, PPE), leave, overtime, advances; labour wage sheets and contractor labour bills checked against attendance |
 | 29 | Payroll with PF/ESI/PT/TDS, posting to the ledger |
 | 30 | Banking: statement import, reconciliation, cheque register |
 | 31 | GST reports (GSTR-1/3B summaries) and full TDS process |
@@ -426,7 +420,8 @@ Ordered by dependency first and business value second; each item builds on the o
 | # | Item |
 |---|---|
 | 36 | Client portal: progress, photos, approvals (quotations, change orders, drawings, selections), invoices, snags, handover pack, messages |
-| 37 | Vendor portal: self-registration, PO/work-order acceptance, quote responses, invoice and bill upload, payment status |
+| 37 | Vendor portal for suppliers, subcontractors (work orders, measurements, RA bills) and labour contractors (own labour, attendance, wage bills, statutory proof) |
+| 37a | Worker self-service (OTP login): own attendance, wages, payslips, in their language |
 | 38 | Online payments; WhatsApp/email notifications |
 
 ### P5 — AI and analytics

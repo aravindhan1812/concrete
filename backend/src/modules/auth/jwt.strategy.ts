@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthUser, UserKind } from '../../common/types';
+import { AuthUser, DataScope, UserKind } from '../../common/types';
 
 interface JwtPayload {
   sub: string;
@@ -12,6 +12,7 @@ interface JwtPayload {
   roles: string[];
   permissions: string[];
   kind?: UserKind;
+  dataScope?: DataScope;
   clientId?: string;
   vendorId?: string;
 }
@@ -35,6 +36,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
       kind: payload.kind ?? 'staff',
+      // Tokens issued before data scopes existed fall back to the narrowest sensible default.
+      dataScope: payload.dataScope ?? (payload.kind && payload.kind !== 'staff' ? 'own_records' : 'assigned_projects'),
       clientId: payload.clientId,
       vendorId: payload.vendorId,
     };
