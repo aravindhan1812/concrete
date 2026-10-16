@@ -11,6 +11,9 @@ export interface Lead {
   estimatedValue?: string;
   status: LeadStatus;
   nextFollowUpAt?: string;
+  /** Set once the lead is converted to (or linked with) a client. */
+  clientId?: string | null;
+  email?: string;
 }
 
 export const PIPELINE: { status: LeadStatus; label: string }[] = [

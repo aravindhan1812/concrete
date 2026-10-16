@@ -92,7 +92,7 @@ Rules:
 
 Leads with an enforced pipeline (`new → contacted → site_visit → quotation → negotiation → won/lost`), follow-ups, clients, contacts, meetings, notes, lead sources and campaigns, conversion of a won lead into a client + quotation. **Client credit**: credit limit and terms per client, outstanding receivables against the limit, overdue alerts, and a hold on new work or invoices when the limit is breached (derived from the ledger).
 
-**Status / gaps:** ✅ leads (API, pipeline, follow-ups, board UI). 🟡 clients, contacts, meetings, notes. ❌ lead-to-client conversion flow, lead source/campaign reporting.
+**Status / gaps:** ✅ leads (API, pipeline, follow-ups, board UI); clients (GSTIN-validated, credit limit and terms, billing and site addresses, active / inactive), contacts with one primary, lead → client conversion with duplicate check, client credit position from the ledger, files and comments on clients. 🟡 meetings, notes. ❌ lead source / campaign reporting, credit hold enforcement on quotations and invoices (comes with those modules).
 
 ### 5.2 Sales — quotations, BOQ, change orders
 
@@ -379,7 +379,7 @@ Ordered by dependency first and business value second; each item builds on the o
 
 | # | Item |
 |---|---|
-| 9 | Clients and contacts; lead → client conversion; client credit limits and terms |
+| 9 | ✅ Clients and contacts; lead → client conversion; client credit limits and terms |
 | 10 | Item master, units, categories, cost codes |
 | 11 | Quotations with versions; BOQ with rate analysis |
 | 12 | Quotation → project conversion; **project team assignment** (PM, site engineer, supervisor, QS, QC… per project — drives assigned-project access); milestones, WBS, tasks |

@@ -19,7 +19,7 @@ export interface NavItem {
 export const NAV: NavItem[] = [
   { key: 'home', label: 'Home', path: '/', icon: 'home', permissions: [], ready: true, mobileRank: 0, group: 'Work' },
   { key: 'leads', label: 'Leads', path: '/crm/leads', icon: 'leads', permissions: ['crm.leads.read'], ready: true, mobileRank: 1, group: 'Work' },
-  { key: 'clients', label: 'Clients', path: '/crm/clients', icon: 'clients', permissions: ['crm.clients.read'], ready: false, group: 'Work' },
+  { key: 'clients', label: 'Clients', path: '/crm/clients', icon: 'clients', permissions: ['crm.clients.read'], ready: true, group: 'Work' },
   { key: 'quotations', label: 'Quotations', path: '/sales/quotations', icon: 'quotations', permissions: ['sales.quotations.read'], ready: false, mobileRank: 5, group: 'Work' },
   { key: 'projects', label: 'Projects', path: '/projects', icon: 'projects', permissions: ['projects.read'], ready: false, mobileRank: 2, group: 'Work' },
   { key: 'drawings', label: 'Drawings', path: '/drawings', icon: 'drawings', permissions: ['drawings.read'], ready: false, group: 'Work' },

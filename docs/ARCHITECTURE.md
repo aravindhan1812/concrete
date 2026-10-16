@@ -112,6 +112,14 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `POST /files/uploads` → `PUT <presigned url>` → `POST /files/:id/complete` | read access to the attached record | Direct-to-storage upload; type allowlist, 100 MB cap, optional GPS + capture time |
 | `GET /files?entityType&entityId` · `GET /files/:id/url` · `DELETE /files/:id` | read access to the record | Short-lived presigned download URL; soft delete |
 | `GET/POST /comments` · `PATCH/DELETE /comments/:id` | read access to the record (edit/delete own) | Threaded replies; @mentions notify staff of the same company |
+| `GET /crm/clients` | `crm.clients.read` | Search (name, code, phone, email, GSTIN, contact), `status` active / inactive / all; assigned-project roles see only their projects' clients; credit shown to client managers and finance |
+| `GET /crm/clients/:id` | `crm.clients.read` | With contacts, leads, projects (scoped) and credit position from the ledger |
+| `GET /crm/clients/duplicates` | `crm.clients.read` | Same GSTIN, phone, email or similar name |
+| `POST /crm/clients` · `PATCH /crm/clients/:id` · `DELETE /crm/clients/:id` | `crm.clients.manage` | GSTIN checksum-validated, state and PAN derived; unique GSTIN per company; delete refused while money is owed or projects are live |
+| `POST/PATCH/DELETE /crm/clients/:id/contacts[/:contactId]` | `crm.clients.manage` | Exactly one primary contact while any exist |
+| `POST /crm/leads/:id/convert` | `crm.clients.manage` | Create a client from the lead (contact becomes primary) or link an existing one |
+| `GET /crm/gst/states` · `GET /crm/gst/validate/:gstin` | `crm.clients.read` | GST state list; GSTIN check for forms |
+| `GET /people/directory` | staff | Names and roles of active staff (for @mentions and pickers) |
 | `GET /dashboard` | authenticated | The user's widgets: their roles' layouts (or admin overrides) filtered by permission, their own order / hidden flags, plus planned widgets as `upcoming` |
 | `GET /dashboard/widgets/:key` | the widget's permissions | Data for one widget, filtered by tenant and data scope |
 | `GET /dashboard/catalog` · `PUT /dashboard/layout` · `DELETE /dashboard/layout` | authenticated | Customise own dashboard (reorder, hide) or reset to role default |

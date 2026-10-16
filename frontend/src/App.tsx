@@ -5,6 +5,7 @@ import Shell from './app/Shell';
 import { SessionProvider, useSession } from './lib/session';
 import ComingSoon, { Forbidden, NotFound } from './pages/ComingSoon';
 import Dashboard from './pages/Dashboard';
+import ClientsRoutes from './pages/clients';
 import Leads from './pages/Leads';
 import Login from './pages/Login';
 
@@ -24,6 +25,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 const PAGES: Record<string, ReactNode> = {
   home: <Dashboard />,
   leads: <Leads />,
+  clients: <ClientsRoutes />,
 };
 
 function AppRoutes() {
