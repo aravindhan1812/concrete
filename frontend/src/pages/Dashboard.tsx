@@ -1,100 +1,145 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { visibleNav } from '../app/nav';
-import { Icons } from '../app/icons';
-import { Alert, Card, Grid, KpiTile, PageHeader, Section } from '../components/ui';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Button, PageHeader } from '../components/ui';
+import WidgetCard from '../dashboard/WidgetCard';
+import { DashboardLayout, WidgetMeta } from '../dashboard/types';
 import { api } from '../lib/api';
-import { inrShort } from '../lib/format';
 import { useSession } from '../lib/session';
-import { LeadStatus, PIPELINE } from '../lib/types';
-
-interface StatRow {
-  status: LeadStatus;
-  count: number;
-  value: number;
-}
-
-const OPEN: LeadStatus[] = ['new', 'contacted', 'site_visit', 'quotation', 'negotiation'];
 
 /**
- * Home dashboard. Today it shows the sales pipeline (the only live data source) plus a
- * module launcher; the per-role dashboard framework (P0.8) will replace the fixed layout.
+ * Role-based home dashboard. The server decides which widgets a user gets (their roles' layouts,
+ * filtered by permission) and the data inside each one (filtered by data scope); users can
+ * reorder and hide widgets for themselves.
  */
 export default function Dashboard() {
-  const { user, can } = useSession();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState<StatRow[] | null>(null);
+  const { user } = useSession();
+  const [layout, setLayout] = useState<DashboardLayout | null>(null);
+  const [draft, setDraft] = useState<WidgetMeta[] | null>(null);
   const [error, setError] = useState('');
-  const canSeeLeads = can('crm.leads.read', 'reports.read');
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!canSeeLeads) return;
+  const load = useCallback(() => {
     api
-      .get<StatRow[]>('/crm/leads/stats')
-      .then(setStats)
+      .get<DashboardLayout>('/dashboard')
+      .then(setLayout)
       .catch((e: Error) => setError(e.message));
-  }, [canSeeLeads]);
+  }, []);
+  useEffect(load, [load]);
 
-  const open = stats?.filter((s) => OPEN.includes(s.status)) ?? [];
-  const openCount = open.reduce((a, s) => a + s.count, 0);
-  const openValue = open.reduce((a, s) => a + s.value, 0);
-  const won = stats?.find((s) => s.status === 'won');
-  const lost = stats?.find((s) => s.status === 'lost');
-  const followUps = stats?.find((s) => s.status === 'negotiation');
+  async function save() {
+    if (!draft) return;
+    setSaving(true);
+    try {
+      setLayout(await api.put<DashboardLayout>('/dashboard/layout', { widgets: draft.map((w) => ({ key: w.key, hidden: w.hidden })) }));
+      setDraft(null);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function reset() {
+    setSaving(true);
+    try {
+      setLayout(await api.del<DashboardLayout>('/dashboard/layout'));
+      setDraft(null);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function move(i: number, dir: -1 | 1) {
+    setDraft((d) => {
+      if (!d) return d;
+      const next = [...d];
+      [next[i], next[i + dir]] = [next[i + dir], next[i]];
+      return next;
+    });
+  }
 
   const firstName = user?.fullName.split(' ')[0] ?? '';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const modules = visibleNav(can).filter((i) => i.key !== 'home');
+  const editing = draft !== null;
+  const widgets = editing ? draft : (layout?.widgets.filter((w) => !w.hidden) ?? []);
 
   return (
     <>
-      <PageHeader title={`${greeting}, ${firstName}`} subtitle={user?.roles.join(' · ')} />
+      <PageHeader
+        title={`${greeting}, ${firstName}`}
+        subtitle={user?.roles.join(' · ')}
+        actions={
+          layout &&
+          (editing ? (
+            <>
+              {layout.customised && (
+                <Button variant="ghost" size="sm" onClick={reset} disabled={saving}>
+                  Reset to role default
+                </Button>
+              )}
+              <Button variant="secondary" size="sm" onClick={() => setDraft(null)} disabled={saving}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={save} loading={saving}>
+                Save layout
+              </Button>
+            </>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={() => setDraft(layout.widgets.map((w) => ({ ...w })))}>
+              Customise
+            </Button>
+          ))
+        }
+      />
       {error && <Alert onDismiss={() => setError('')}>{error}</Alert>}
+      {editing && <p className="muted dash-edit-hint">Reorder or hide widgets. This only changes your own dashboard.</p>}
 
-      {canSeeLeads && (
-        <Section title="Sales pipeline">
-          <Grid min={160}>
-            <KpiTile label="Open leads" value={stats ? openCount : '—'} icon="leads" onClick={() => navigate('/crm/leads')} />
-            <KpiTile label="Pipeline value" value={stats ? inrShort(openValue) : '—'} tone="info" />
-            <KpiTile label="In negotiation" value={stats ? followUps?.count ?? 0 : '—'} tone="warning" delta={stats && followUps ? inrShort(followUps.value) : undefined} />
-            <KpiTile label="Won" value={stats ? won?.count ?? 0 : '—'} tone="success" delta={stats && won ? inrShort(won.value) : undefined} />
-            <KpiTile label="Lost" value={stats ? lost?.count ?? 0 : '—'} tone="danger" />
-          </Grid>
-          {stats && (
-            <div className="funnel">
-              {PIPELINE.filter((p) => OPEN.includes(p.status)).map((p) => {
-                const row = stats.find((s) => s.status === p.status);
-                const pct = openCount ? ((row?.count ?? 0) / openCount) * 100 : 0;
-                return (
-                  <div className="funnel-row" key={p.status}>
-                    <span className="funnel-label">{p.label}</span>
-                    <span className="funnel-bar">
-                      <span style={{ width: `${Math.max(pct, row?.count ? 4 : 0)}%` }} />
-                    </span>
-                    <span className="funnel-count">{row?.count ?? 0}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Section>
+      {!layout && !error && (
+        <div className="dash-grid">
+          <div className="widget size-full">
+            <div className="skeleton sk-kpis" />
+          </div>
+          <div className="widget size-half">
+            <div className="skeleton sk-table" />
+          </div>
+          <div className="widget size-half">
+            <div className="skeleton sk-table" />
+          </div>
+        </div>
       )}
 
-      <Section title="Modules">
-        <Grid min={150}>
-          {modules.map((m) => {
-            const Icon = Icons[m.icon];
-            return (
-              <Card key={m.key} onClick={() => navigate(m.path)} className="module-card">
-                <Icon />
-                <div className="module-title">{m.label}</div>
-                {!m.ready && <div className="module-soon">Coming soon</div>}
-              </Card>
-            );
-          })}
-        </Grid>
-      </Section>
+      <div className={`dash-grid${editing ? ' editing' : ''}`}>
+        {widgets.map((w, i) => (
+          <WidgetCard
+            key={w.key}
+            widget={w}
+            edit={
+              editing
+                ? {
+                    onUp: i > 0 ? () => move(i, -1) : undefined,
+                    onDown: i < widgets.length - 1 ? () => move(i, 1) : undefined,
+                    onToggle: () => setDraft((d) => d && d.map((x) => (x.key === w.key ? { ...x, hidden: !x.hidden } : x))),
+                  }
+                : undefined
+            }
+          />
+        ))}
+      </div>
+
+      {layout && layout.upcoming.length > 0 && !editing && (
+        <aside className="dash-upcoming" aria-label="Coming to your dashboard">
+          <span className="upcoming-label">Coming to your dashboard</span>
+          <span className="upcoming-items">
+            {layout.upcoming.map((u) => (
+              <span key={u.key} className="upcoming-chip" title={`Arrives with the ${u.module} module`}>
+                {u.title}
+              </span>
+            ))}
+          </span>
+        </aside>
+      )}
     </>
   );
 }

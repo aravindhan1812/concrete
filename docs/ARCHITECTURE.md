@@ -48,6 +48,7 @@ Concrete is a multi-tenant SaaS ERP for construction and interior contractors. O
 | Shared services | Numbering, approvals, notifications and entity access are global Nest modules; other modules inject them | One implementation of each cross-cutting concern; modules stay small |
 | Files | Browser → object storage via presigned PUT; API stores metadata only | Large drawings and phone photos never stream through the API |
 | Attachments & comments access | Follows the record they belong to (`ENTITY_REGISTRY`: entity type → table + read permissions, tenant check) | No separate permission model to keep in sync |
+| Dashboards | Widget catalogue + per-role default layouts in code; one data endpoint per widget; layouts may name planned widgets that switch on when their module ships | Each role gets a relevant home screen now, and it fills in as modules land without layout migrations |
 | Schema drift | `npm run schema:check` in CI compares every entity column with the migrated database | Catches an entity that no longer matches the SQL-owned schema |
 | Posting rules | `accounts.system_key` maps each rule target (`ar_control`, `output_gst`, …) to one ledger per company | Companies rename / restructure their chart without touching code |
 
@@ -111,6 +112,10 @@ Base URL `/api/v1`. Bearer JWT on everything except `auth/register-company`, `au
 | `POST /files/uploads` → `PUT <presigned url>` → `POST /files/:id/complete` | read access to the attached record | Direct-to-storage upload; type allowlist, 100 MB cap, optional GPS + capture time |
 | `GET /files?entityType&entityId` · `GET /files/:id/url` · `DELETE /files/:id` | read access to the record | Short-lived presigned download URL; soft delete |
 | `GET/POST /comments` · `PATCH/DELETE /comments/:id` | read access to the record (edit/delete own) | Threaded replies; @mentions notify staff of the same company |
+| `GET /dashboard` | authenticated | The user's widgets: their roles' layouts (or admin overrides) filtered by permission, their own order / hidden flags, plus planned widgets as `upcoming` |
+| `GET /dashboard/widgets/:key` | the widget's permissions | Data for one widget, filtered by tenant and data scope |
+| `GET /dashboard/catalog` · `PUT /dashboard/layout` · `DELETE /dashboard/layout` | authenticated | Customise own dashboard (reorder, hide) or reset to role default |
+| `PUT /rbac/roles/:id/dashboard` | `admin.roles.manage` | Override a role's default widgets (`null` restores the built-in layout) |
 | `GET /notifications` · `/unread-count` · `POST /notifications/:id/read` · `/read-all` | own (staff and portal) | In-app notifications |
 | `GET /crm/leads` | `crm.leads.read` | Filter: `status`, `search` (title/contact/phone), paginated |
 | `GET /crm/leads/stats` | `crm.leads.read` or `reports.read` | Count + pipeline value by status |

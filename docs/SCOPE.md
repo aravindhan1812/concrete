@@ -325,7 +325,7 @@ A dashboard framework built from shared widgets (KPI tile, trend chart, breakdow
 
 Plus a **report builder** (choose dataset, columns, filters, grouping, chart) and scheduled email of any report.
 
-**Status / gaps:** 🟡 `reports.read` permission. ❌ everything else.
+**Status / gaps:** ✅ framework (migration `0008_dashboards`): widget catalogue, default layouts for all 17 staff roles, per-user reorder / hide, admin override per role, data filtered by permission and project scope, KPI / trend / funnel / table / alert / shortcut widgets. Live widgets today: cash & balances, revenue trend, top receivables, projects summary and list, open site issues, sales pipeline, funnel, follow-ups, approvals inbox and own requests. Each role's other widgets are listed as "coming to your dashboard" and switch on as their modules ship. ❌ report builder, scheduled email reports, drag-and-drop layout editor for admins.
 
 ---
 
@@ -373,7 +373,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 5 | ✅ Shared backend services: numbering series, approval engine with amount thresholds, file storage (MinIO / S3), comments, in-app notifications | Used by every document type |
 | 6 | ✅ External users: `users.client_id` / `users.vendor_id` with single-point scoping | Client and Vendor roles cannot work without it |
 | 7 | ✅ Double-entry ledger core: chart of accounts, balanced journals, dimensions, voucher types, financial years, period locks, posting-rule mapping | Must exist before any module creates money documents |
-| 8 | Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
+| 8 | ✅ Dashboard framework: shared widgets, permission-filtered data | Role dashboards are built on it in each phase |
 
 ### P1 — Core business flow (enquiry → first invoice)
 

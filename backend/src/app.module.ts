@@ -14,6 +14,7 @@ import { ApprovalsModule } from './modules/approvals/approvals.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { FilesModule } from './modules/files/files.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -47,6 +48,7 @@ import { UsersModule } from './modules/users/users.module';
     RbacModule,
     UsersModule,
     LeadsModule,
+    DashboardModule,
   ],
   providers: [
     // Order matters: authenticate → check audience (staff vs portal) → check permissions.
