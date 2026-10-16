@@ -17,7 +17,7 @@ Access is three questions, answered in this order:
 | Scope | Sees | Roles |
 |---|---|---|
 | `company` | Everything in the company | Owner, Director, Purchase Manager, Store Manager, Finance, HR, Sales |
-| `assigned_projects` | Only projects they are a member of (`project_members`), and everything inside those projects | Project Manager, Site Engineer, Site Supervisor, QS, QC, Safety, Site Storekeeper, Designer |
+| `assigned_projects` | Only projects they are a member of (`project_members`), and everything inside those projects | Project Manager, Planning Engineer, Site Engineer, MEP Engineer, Site Supervisor, QS, QC, Safety, Site Storekeeper, Designer |
 | `own_records` | Only records linked to their client or vendor | Client, Vendor, Subcontractor, Labour Contractor |
 
 A user with several roles gets the broadest scope. Portal logins can never get more than `own_records`, even if a role is misconfigured. Each person's responsibility on a project (PM, site engineer, QC…) is recorded on their project membership, so the same engineer can be the site engineer on one project and the QC engineer on another.
@@ -34,9 +34,12 @@ A user with several roles gets the broadest scope. Portal logins can never get m
    Projects            Supply           Finance             HR            Sales & Design
         │                 │                │                  │                 │
  Project Manager    Purchase Manager    Finance /         HR / Admin     Sales Executive
+   ├ Planning Engineer
    ├ Site Engineer   Store Manager      Accounts                         Designer / Architect
    │   └ Site Supervisor / Foreman
    │        └ Labour gangs (own + contractor)
+   ├ MEP Engineer (electrical · plumbing · HVAC · fire)
+   │   └ MEP subcontractors
    ├ Quantity Surveyor (billing)
    ├ QC Engineer
    ├ Safety Officer
@@ -62,10 +65,17 @@ A user with several roles gets the broadest scope. Portal logins can never get m
 
 ### Project Manager (PM)
 - **Responsible for:** delivering assigned projects on time, within budget and quality; client coordination; planning and re-planning; procurement needs; certifying progress for billing; managing subcontractors.
-- **Daily in Concrete:** reviews daily site reports; updates the schedule; approves material requests, subcontractor bills, labour wage sheets and site expenses within limits; approves drawings for construction; signs off client RA bills; closes NCRs; approves permits to work; tracks risks, budget vs actual.
+- **Daily in Concrete:** reviews daily site reports; approves schedule changes and baselines prepared by the planning engineer; approves material requests, subcontractor bills, labour wage sheets and site expenses within limits; approves drawings for construction; signs off client RA bills; closes NCRs; approves permits to work; tracks risks, budget vs actual.
 - **Scope:** assigned projects · **Device:** desktop + tablet
 - **Approves:** material requests, POs up to their limit, subcontractor RA bills, labour wage sheets, site expenses, client RA bills (before Finance invoices), drawings, permits.
 - **Dashboard:** schedule variance, cost vs budget per project, pending approvals, open issues / NCRs / snags, upcoming milestones and billing.
+
+### Planning Engineer
+- **Responsible for:** the project schedule — work breakdown, activity durations and dependencies, the baseline, the critical path; weekly and monthly look-ahead plans; tracking actual progress against plan; delay analysis and recovery plans; resource and material requirement plans that feed procurement.
+- **Daily in Concrete:** builds and re-plans the schedule (Gantt); sets baselines for PM approval; reads daily reports and task progress from site; publishes look-ahead plans; flags slipping activities and critical-path risk; raises material requirements ahead of need; maintains the risk register with the PM.
+- **Scope:** assigned projects · **Device:** desktop
+- **Holds:** `projects.schedule.manage` (with the PM). Site and MEP engineers update progress on tasks but cannot change the plan.
+- **Dashboard:** planned vs actual progress (S-curve), critical-path activities, delayed tasks, look-ahead for the next 2–4 weeks, material needed vs ordered.
 
 ### Site Engineer
 - **Responsible for:** executing work on site as per drawings, specifications and schedule; supervising supervisors and subcontractors; measurements; material planning; quality and safety on site.
@@ -73,6 +83,13 @@ A user with several roles gets the broadest scope. Portal logins can never get m
 - **Scope:** assigned projects · **Device:** phone (on site), tablet
 - **Cannot:** approve their own material requests, verify their own measurements, approve wage sheets.
 - **Dashboard:** today's tasks, attendance, pending material requests, inspections due, open permits and issues.
+
+### MEP Engineer
+- **Responsible for:** mechanical, electrical and plumbing services — power and lighting, plumbing and drainage, HVAC, fire-fighting and fire alarm, low-voltage systems; coordination of MEP drawings with civil and interior work; supervising MEP subcontractors; testing and commissioning (insulation resistance / megger, pressure and leak tests, HVAC balancing, fire-system tests); as-built MEP drawings for handover.
+- **Daily in Concrete:** reports MEP progress in the daily report; records MEP measurements for subcontractor bills; uploads MEP coordination and shop drawings; raises MEP material requests; requests electrical / hot-work permits; carries out and records MEP tests with photos; raises and closes MEP snags; flags clashes and hindrances.
+- **Scope:** assigned projects · **Device:** tablet + phone
+- **Cannot:** verify measurements or approve subcontractor bills (QS verifies, PM approves).
+- **Dashboard:** MEP progress by system, tests due / failed, open MEP snags, MEP material pending, subcontractor progress.
 
 ### Site Supervisor / Foreman
 - **Responsible for:** day-to-day labour gangs, work allocation, discipline, housekeeping, basic safety.
@@ -181,6 +198,18 @@ R = does it · A = approves / accountable · C = consulted · I = informed
 | Change order | | C | **R** | R (cost) | | | | | I | A (above limit) | Client **A** |
 | Drawing for construction | | I | **A** | I | I | | | | | | Designer **R** |
 
+**Planning and MEP workflows**
+
+| Workflow | Planning Engineer | MEP Engineer | Site Engineer | PM | QS | QC | Purchase | Director | External |
+|---|---|---|---|---|---|---|---|---|---|
+| Project schedule & baseline | **R** | C (MEP sequence) | C | **A** | I | | I | I (major change) | Client I (milestones) |
+| Weekly / monthly look-ahead plan | **R** | C | C | A | | | I (material needs) | | |
+| Delay analysis & recovery plan | **R** | C | C | **A** | C (cost impact) | | | I | Client I / A (extension of time) |
+| Material requirement plan | **R** | R (MEP items) | C | A | C | | **R** (procure) | | |
+| MEP drawing coordination | C | **R** | C | A | | | | | Designer C · MEP subcontractor C |
+| MEP testing & commissioning | | **R** | I | A | | C | | | MEP subcontractor R · Client I |
+| MEP subcontractor measurement & bill | | **R** (measure) | | **A** | **R** (verify) | | | A (above limit) | Subcontractor R (bill) |
+
 ### Recommended approval rules (configured per company)
 
 | Document | Step 1 | Step 2 | Step 3 |
@@ -200,7 +229,7 @@ Limits are examples; each company sets its own in **Admin → Approval rules**. 
 
 | Piece | Status |
 |---|---|
-| 19 role templates with permission sets and data scopes; synced to every company | ✅ migration 0006 |
+| 21 role templates with permission sets and data scopes; synced to every company | ✅ migrations 0006, 0007 |
 | Permission codes for site, labour, quality, safety, drawings, billing, subcontracting, portals | ✅ |
 | `dataScope` on roles, in the login token and on `AuthUser`; `PATCH /rbac/roles/:id` to change it | ✅ |
 | `ProjectScopeService` (`projectIds`, `assertProject`) for project-level modules | ✅ (used from P1 as project modules are built) |

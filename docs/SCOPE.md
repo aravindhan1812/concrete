@@ -28,7 +28,7 @@ Full detail — responsibilities, daily use, data scope, approval authority, who
 | Group | Roles (templates) | Sees |
 |---|---|---|
 | Management | Company Owner, Director | Whole company |
-| Project delivery | Project Manager, Site Engineer, Site Supervisor / Foreman, Quantity Surveyor, QC Engineer, Safety Officer, Site Storekeeper, Designer | Only their assigned projects |
+| Project delivery | Project Manager, Planning Engineer, Site Engineer, MEP Engineer, Site Supervisor / Foreman, Quantity Surveyor, QC Engineer, Safety Officer, Site Storekeeper, Designer | Only their assigned projects |
 | Supply chain | Purchase Manager, Store Manager | Whole company |
 | Back office | Finance, HR, Sales Executive | Whole company |
 | External (portals) | Client, Vendor (supplier), Subcontractor, Labour Contractor | Only their own records |
@@ -310,7 +310,9 @@ A dashboard framework built from shared widgets (KPI tile, trend chart, breakdow
 |---|---|
 | Owner / Director | Revenue, gross margin, cash position, receivables and payables ageing, projects at risk, pipeline value, safety LTI-free days |
 | Project Manager | Schedule variance, cost vs budget per project, open issues/NCRs/snags, pending approvals, upcoming milestones and billing |
+| Planning Engineer | Planned vs actual progress (S-curve), critical-path activities, delayed tasks, 2–4 week look-ahead, material needed vs ordered |
 | Site Engineer | Today's tasks, attendance, pending material requests, inspections due, open permits |
+| MEP Engineer | MEP progress by system, tests due / failed, open MEP snags, MEP material pending, MEP subcontractor progress |
 | QC Engineer | Inspections due, first-time pass rate, open NCRs by age, snags by subcontractor, tests due |
 | Safety Officer | Incident and near-miss trend, open permits, toolbox talk compliance, expiring certifications |
 | Purchase Manager | Open requests and POs, late deliveries, price trends, vendor scores, expiring vendor documents |
@@ -381,7 +383,7 @@ Ordered by dependency first and business value second; each item builds on the o
 | 10 | Item master, units, categories, cost codes |
 | 11 | Quotations with versions; BOQ with rate analysis |
 | 12 | Quotation → project conversion; **project team assignment** (PM, site engineer, supervisor, QS, QC… per project — drives assigned-project access); milestones, WBS, tasks |
-| 13 | Gantt, baseline schedule, progress against BOQ quantities |
+| 13 | Gantt, baseline schedule (planning engineer builds, PM approves), look-ahead plans, critical path, progress against BOQ quantities |
 | 14 | Drawings: register, revisions, transmittals, RFIs, in-browser viewer |
 | 15 | Change orders / variations updating BOQ, budget and schedule |
 | 16 | Client invoicing (advance/progress/final, GST, retention) and receipts, posting to the ledger |
